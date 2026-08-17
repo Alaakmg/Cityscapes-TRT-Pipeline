@@ -1,0 +1,10 @@
+{
+  "onnx": "/workspace/results/model.onnx",
+  "engine": "/workspace/results/model_fp32.engine",
+  "fp16": false,
+  "int8": false,
+  "calib_images": null,
+  "engine_mb": 251.18,
+  "build_seconds": 8.5,
+  "trt_version": "10.16.1.11"
+}
