@@ -32,6 +32,9 @@ else
     git clone "$REPO_URL" "$REPO_DIR"
 fi
 cd "$REPO_DIR"
+# runpod pytorch images (ubuntu 24.04) ship torch in the system python,
+# so installs must opt out of PEP 668
+export PIP_BREAK_SYSTEM_PACKAGES=1
 pip install -q -e ".[dev]"
 
 echo "== sanity =="
