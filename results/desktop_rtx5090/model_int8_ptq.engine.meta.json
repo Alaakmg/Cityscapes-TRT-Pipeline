@@ -1,0 +1,10 @@
+{
+  "onnx": "/workspace/results/model.onnx",
+  "engine": "/workspace/results/model_int8_ptq.engine",
+  "fp16": false,
+  "int8": true,
+  "calib_images": 500,
+  "engine_mb": 46.01,
+  "build_seconds": 172.4,
+  "trt_version": "10.16.1.11"
+}
