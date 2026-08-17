@@ -1,0 +1,10 @@
+__pycache__/
+.venv/
+.claude/
+*.egg-info/
+runs/
+*.onnx
+*.engine
+*.cache
+data/
+.DS_Store
