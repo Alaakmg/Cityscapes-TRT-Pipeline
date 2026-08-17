@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "segdeploy"
+version = "0.1.0"
+description = "Cityscapes semantic segmentation: FP32 PyTorch -> ONNX -> TensorRT INT8 on Jetson"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "numpy",
+    "pyyaml",
+    "pillow",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+export = ["onnx>=1.15", "onnxruntime>=1.17"]
+dev = ["pytest", "ruff", "black", "onnx>=1.15", "onnxruntime>=1.17"]
+# TensorRT + pycuda are installed from the JetPack / NGC stack on the target
+# device and are intentionally NOT pip dependencies here.
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
