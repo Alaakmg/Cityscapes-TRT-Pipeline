@@ -6,4 +6,5 @@ runs/
 *.engine
 *.cache
 data/
+datasets/
 .DS_Store
