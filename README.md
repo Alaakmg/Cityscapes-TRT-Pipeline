@@ -71,6 +71,11 @@ python trt/build_engine.py --onnx model.onnx --out model_fp16.engine --fp16
 python trt/build_engine.py --onnx model.onnx --out model_int8.engine --int8 \
     --calib-dir $CITYSCAPES/leftImg8bit/train --calib-images 500
 
+# INT8 QAT: fine-tune with fake quant (modelopt), export Q/DQ onnx,
+# then build --int8 with no calibrator (ranges live in the graph)
+python trt/qat_finetune.py --config configs/baseline.yaml --checkpoint runs/fp32/best.pt --out runs/qat
+python trt/build_engine.py --onnx runs/qat/model_qat.onnx --out model_int8_qat.engine --int8
+
 # accuracy + latency of any artifact
 python -m segdeploy.evaluate  --backend trt --model model_int8.engine --data-root $CITYSCAPES
 python -m segdeploy.benchmark --backend trt --model model_int8.engine
