@@ -21,7 +21,7 @@ Desktop = RTX 5090 (RunPod), TensorRT 10.16, torch 2.8.0+cu128. Raw JSONs in `re
 | PyTorch | FP32 | RTX 5090 | 0.8334 | – | 9.35 | 9.66 | 107 | 176 |
 | TensorRT | FP32 | RTX 5090 | 0.8334 | ±0.0000 | 6.17 | 6.19 | 162 | 251 |
 | TensorRT | FP16 | RTX 5090 | 0.8334 | −0.0000 | 2.96 | 2.97 | 338 | 89 |
-| TensorRT | INT8 (PTQ) | RTX 5090 | – | – | – | – | – | – |
+| TensorRT | INT8 (PTQ) | RTX 5090 | 0.8246 | −0.0088 | 2.94 | 2.96 | 340 | 46 |
 | TensorRT | INT8 (QAT) | RTX 5090 | – | – | – | – | – | – |
 | TensorRT | FP16 | Jetson Orin Nano | – | – | – | – | – | – |
 | TensorRT | INT8 (QAT) | Jetson Orin Nano | – | – | – | – | – | – |
@@ -29,6 +29,12 @@ Desktop = RTX 5090 (RunPod), TensorRT 10.16, torch 2.8.0+cu128. Raw JSONs in `re
 FP16 so far: 3.2x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
 parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).
+
+INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but no
+latency win over FP16 at batch 1 on the 5090. The workload isn't INT8-math-bound
+there; the INT8 case rests on the bandwidth-starved Jetson. Degradation is spread
+across classes (construction/object/nature −1.4 to −1.6 pts), the QAT row exists
+to win that back.
 
 Per-class IoU breakdowns will go in `docs/findings.md`. Thin structures (poles,
 humans) are usually the first classes to suffer under quantization, so I track
