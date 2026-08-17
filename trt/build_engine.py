@@ -42,22 +42,26 @@ def build(args) -> None:
     if args.fp16:
         config.set_flag(trt.BuilderFlag.FP16)
     if args.int8:
-        # Deferred import: calibration uses IInt8EntropyCalibrator2, which
-        # TensorRT 11 removed (implicit INT8 quantization is gone there, only
-        # explicit Q/DQ remains). We pin TRT 10.x, matching JetPack on the
-        # Jetson target; the import stays lazy so FP32/FP16 builds don't care.
-        from calibrator import EntropyCalibrator  # local module, same directory
-
         config.set_flag(trt.BuilderFlag.INT8)
         # FP16 fallback for layers TensorRT declines to run in INT8.
         config.set_flag(trt.BuilderFlag.FP16)
-        input_shape = tuple(network.get_input(0).shape)  # (1, 3, H, W)
-        config.int8_calibrator = EntropyCalibrator(
-            image_dir=args.calib_dir,
-            input_shape=input_shape,
-            n_images=args.calib_images,
-            cache_file=args.calib_cache,
-        )
+        if args.calib_dir or Path(args.calib_cache).exists():
+            # Implicit quantization (calibrator) path. Deferred import:
+            # IInt8EntropyCalibrator2 is gone in TensorRT 11 (explicit Q/DQ
+            # only there); we pin TRT 10.x to match JetPack on the Jetson.
+            from calibrator import EntropyCalibrator  # local module, same directory
+
+            input_shape = tuple(network.get_input(0).shape)  # (1, 3, H, W)
+            config.int8_calibrator = EntropyCalibrator(
+                image_dir=args.calib_dir,
+                input_shape=input_shape,
+                n_images=args.calib_images,
+                cache_file=args.calib_cache,
+            )
+        else:
+            # No calibrator: the ONNX is expected to carry Q/DQ nodes
+            # (QAT / explicit quantization), ranges come from the graph.
+            print("INT8 without calibrator: assuming explicit Q/DQ ONNX (QAT export)")
 
     print("Building engine (this can take several minutes)...")
     t0 = time.time()
@@ -99,8 +103,6 @@ def main() -> None:
     ap.add_argument("--workspace-gb", type=int, default=2)
     args = ap.parse_args()
 
-    if args.int8 and not args.calib_dir and not Path(args.calib_cache).exists():
-        ap.error("--int8 requires --calib-dir (or an existing --calib-cache)")
     build(args)
 
 
