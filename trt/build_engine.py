@@ -20,7 +20,6 @@ import time
 from pathlib import Path
 
 import tensorrt as trt
-from calibrator import EntropyCalibrator  # local module, same directory
 
 
 def build(args) -> None:
@@ -43,6 +42,12 @@ def build(args) -> None:
     if args.fp16:
         config.set_flag(trt.BuilderFlag.FP16)
     if args.int8:
+        # Deferred import: calibration uses IInt8EntropyCalibrator2, which
+        # TensorRT 11 removed (implicit INT8 quantization is gone there, only
+        # explicit Q/DQ remains). We pin TRT 10.x, matching JetPack on the
+        # Jetson target; the import stays lazy so FP32/FP16 builds don't care.
+        from calibrator import EntropyCalibrator  # local module, same directory
+
         config.set_flag(trt.BuilderFlag.INT8)
         # FP16 fallback for layers TensorRT declines to run in INT8.
         config.set_flag(trt.BuilderFlag.FP16)
