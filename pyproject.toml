@@ -18,6 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 export = ["onnx>=1.15", "onnxruntime>=1.17"]
+qat = ["nvidia-modelopt"]
 dev = ["pytest", "ruff", "black", "onnx>=1.15", "onnxruntime>=1.17"]
 # TensorRT comes from the JetPack stack (Jetson) or pip (desktop) on the
 # target device and is intentionally NOT a dependency here. The TRT runner
