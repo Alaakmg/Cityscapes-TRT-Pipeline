@@ -19,8 +19,9 @@ dependencies = [
 [project.optional-dependencies]
 export = ["onnx>=1.15", "onnxruntime>=1.17"]
 dev = ["pytest", "ruff", "black", "onnx>=1.15", "onnxruntime>=1.17"]
-# TensorRT + pycuda are installed from the JetPack / NGC stack on the target
-# device and are intentionally NOT pip dependencies here.
+# TensorRT comes from the JetPack stack (Jetson) or pip (desktop) on the
+# target device and is intentionally NOT a dependency here. The TRT runner
+# and calibrator use torch tensors as device buffers, so no pycuda.
 
 [tool.setuptools.packages.find]
 where = ["src"]

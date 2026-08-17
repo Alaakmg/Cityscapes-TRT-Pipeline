@@ -10,9 +10,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-import pycuda.autoinit  # noqa: F401
-import pycuda.driver as cuda
 import tensorrt as trt
+import torch
 from PIL import Image
 
 from segdeploy.data import preprocess_image
@@ -34,7 +33,8 @@ class EntropyCalibrator(trt.IInt8EntropyCalibrator2):
         if image_dir:
             self.paths = sorted(Path(image_dir).rglob("*.png"))[:n_images]
         self.index = 0
-        self.device_input = cuda.mem_alloc(int(np.prod(input_shape)) * 4)
+        # torch CUDA tensor as the calibration buffer (no pycuda, see runners.py)
+        self.device_input = torch.empty(input_shape, dtype=torch.float32, device="cuda")
 
     def get_batch_size(self) -> int:
         return self.input_shape[0]
@@ -45,11 +45,12 @@ class EntropyCalibrator(trt.IInt8EntropyCalibrator2):
         _, _, h, w = self.input_shape
         img = Image.open(self.paths[self.index])
         batch = preprocess_image(img, (h, w))[None].astype(np.float32)
-        cuda.memcpy_htod(self.device_input, np.ascontiguousarray(batch))
+        self.device_input.copy_(torch.from_numpy(np.ascontiguousarray(batch)))
+        torch.cuda.synchronize()
         self.index += 1
         if self.index % 50 == 0:
             print(f"  calibration: {self.index}/{len(self.paths)}")
-        return [int(self.device_input)]
+        return [int(self.device_input.data_ptr())]
 
     def read_calibration_cache(self):
         if self.cache_file.exists():
