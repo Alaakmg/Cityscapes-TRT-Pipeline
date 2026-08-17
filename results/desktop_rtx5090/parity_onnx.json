@@ -1,0 +1,10 @@
+{
+  "onnx": "/workspace/results/model.onnx",
+  "checkpoint": "/workspace/runs/fp32/best.pt",
+  "batches": 4,
+  "max_abs_diff": 4.106760025024414e-05,
+  "max_rel_diff": 2.2831432819366455,
+  "argmax_mismatch_fraction": 3.814697265625e-06,
+  "atol": 0.001,
+  "passed": true
+}

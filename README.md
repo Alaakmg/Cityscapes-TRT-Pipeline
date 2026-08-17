@@ -14,16 +14,21 @@ Accuracy is always measured on the deployed artifact itself
 (`python -m segdeploy.evaluate --backend ...`), never on the source PyTorch model.
 Latency: batch 1, 512x1024, 20 warmup + 200 timed iterations, explicit device sync.
 
+Desktop = RTX 5090 (RunPod), TensorRT 10.16, torch 2.8.0+cu128. Raw JSONs in `results/`.
+
 | Variant | Precision | Device | mIoU | Δ vs FP32 | Latency mean (ms) | p95 (ms) | img/s | Size (MB) |
 |---|---|---|---|---|---|---|---|---|
-| PyTorch | FP32 | RTX (desktop) | – | – | – | – | – | – |
-| ONNX Runtime | FP32 | CPU / CUDA EP | – | – | – | – | – | – |
-| TensorRT | FP32 | desktop | – | – | – | – | – | – |
-| TensorRT | FP16 | desktop | – | – | – | – | – | – |
-| TensorRT | INT8 (PTQ) | desktop | – | – | – | – | – | – |
-| TensorRT | INT8 (QAT) | desktop | – | – | – | – | – | – |
+| PyTorch | FP32 | RTX 5090 | 0.8334 | – | 9.35 | 9.66 | 107 | 176 |
+| TensorRT | FP32 | RTX 5090 | 0.8334 | ±0.0000 | 6.17 | 6.19 | 162 | 251 |
+| TensorRT | FP16 | RTX 5090 | 0.8334 | −0.0000 | 2.96 | 2.97 | 338 | 89 |
+| TensorRT | INT8 (PTQ) | RTX 5090 | – | – | – | – | – | – |
+| TensorRT | INT8 (QAT) | RTX 5090 | – | – | – | – | – | – |
 | TensorRT | FP16 | Jetson Orin Nano | – | – | – | – | – | – |
 | TensorRT | INT8 (QAT) | Jetson Orin Nano | – | – | – | – | – | – |
+
+FP16 so far: **3.2x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss**
+(per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
+parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).
 
 Per-class IoU breakdowns will go in `docs/findings.md`. Thin structures (poles,
 humans) are usually the first classes to suffer under quantization, so I track
@@ -104,10 +109,10 @@ python scripts/plot_training.py --run runs/fp32 --run runs/qat --out docs/curves
 ## Roadmap
 
 - [x] skeleton, CI, benchmark methodology fixed before any experiment
-- [ ] FP32 baseline trained on Cityscapes (8 categories)
-- [ ] ONNX export + numerical parity gate
-- [ ] TensorRT FP32/FP16, accuracy measured on the engine itself
-- [ ] INT8: PTQ (entropy calibration), then QAT (`pytorch-quantization`, Q/DQ export)
+- [x] FP32 baseline trained on Cityscapes (8 categories): val mIoU 0.833, 60 epochs
+- [x] ONNX export + numerical parity gate
+- [x] TensorRT FP32/FP16, accuracy measured on the engine itself
+- [ ] INT8: PTQ (entropy calibration), then QAT (Q/DQ export)
 - [ ] Jetson Orin Nano: on-device benchmarks, `trtexec` / Nsight profiling
 - [ ] C++ inference wrapper (`cpp/`), write-up
 
