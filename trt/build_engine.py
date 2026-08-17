@@ -65,8 +65,10 @@ def build(args) -> None:
     build_s = time.time() - t0
     if serialized is None:
         raise RuntimeError("Engine build failed")
+    # IHostMemory supports the buffer protocol but (as of TRT 10.16) not len()
+    size_mb = memoryview(serialized).nbytes / 1e6
     Path(args.out).write_bytes(serialized)
-    print(f"Saved {args.out} ({len(serialized) / 1e6:.1f} MB)")
+    print(f"Saved {args.out} ({size_mb:.1f} MB)")
 
     # engines are disposable/device-specific, keep the build facts next to them
     meta = {
@@ -75,7 +77,7 @@ def build(args) -> None:
         "fp16": args.fp16,
         "int8": args.int8,
         "calib_images": args.calib_images if args.int8 else None,
-        "engine_mb": round(len(serialized) / 1e6, 2),
+        "engine_mb": round(size_mb, 2),
         "build_seconds": round(build_s, 1),
         "trt_version": trt.__version__,
     }
