@@ -31,7 +31,12 @@ try:
     import modelopt.torch.opt as mto
     import modelopt.torch.quantization as mtq
 except ImportError as e:  # pragma: no cover
-    raise SystemExit("nvidia-modelopt is required for QAT: pip install nvidia-modelopt") from e
+    # keep the underlying error visible: modelopt itself may be installed while
+    # one of its undeclared imports (e.g. huggingface_hub) is missing
+    raise SystemExit(
+        f"modelopt import failed: {e!r}\n"
+        "for QAT: pip install nvidia-modelopt huggingface_hub"
+    ) from e
 
 from segdeploy.data import CityscapesCategories
 from segdeploy.labels import CATEGORY_NAMES
