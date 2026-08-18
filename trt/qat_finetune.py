@@ -19,6 +19,7 @@ Then:
 from __future__ import annotations
 
 import argparse
+import copy
 from pathlib import Path
 
 import torch
@@ -30,6 +31,9 @@ from tqdm import tqdm
 try:
     import modelopt.torch.opt as mto
     import modelopt.torch.quantization as mtq
+    from modelopt.torch.quantization.calib.histogram import HistogramCalibrator
+    from modelopt.torch.quantization.model_calib import enable_stats_collection
+    from modelopt.torch.quantization.nn import TensorQuantizer
 except ImportError as e:  # pragma: no cover
     # keep the underlying error visible: modelopt itself may be installed while
     # one of its undeclared imports (e.g. huggingface_hub) is missing
@@ -51,7 +55,8 @@ def main() -> None:
     ap.add_argument("--checkpoint", required=True, help="FP32 checkpoint to start from")
     ap.add_argument("--epochs", type=int, default=5)
     ap.add_argument("--lr", type=float, default=1e-5)
-    ap.add_argument("--calib-batches", type=int, default=16)
+    ap.add_argument("--calib-batches", type=int, default=64)
+    ap.add_argument("--percentile", type=float, default=99.9, help="Activation amax percentile")
     ap.add_argument("--out", default="runs/qat")
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text())
@@ -77,27 +82,55 @@ def main() -> None:
         num_workers=cfg.get("workers", 4),
     )
 
-    # Insert fake-quant modules and calibrate initial ranges on a few
-    # training batches (same preprocessing as everything else).
-    def forward_loop(m: nn.Module) -> None:
-        m.eval()
-        with torch.no_grad():
-            for i, (x, _) in enumerate(train_dl):
-                if i >= args.calib_batches:
-                    break
-                m(x.to(device))
-
-    model = mtq.quantize(model, mtq.INT8_DEFAULT_CFG, forward_loop)
-
-    criterion = nn.CrossEntropyLoss()
-    opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     logger = MetricsLogger(out_dir)
     logger.log(
         "config", start_checkpoint=args.checkpoint, epochs=args.epochs,
-        lr=args.lr, calib_batches=args.calib_batches, quant="modelopt INT8_DEFAULT_CFG",
+        lr=args.lr, calib_batches=args.calib_batches, percentile=args.percentile,
+        quant="modelopt INT8, histogram/percentile activation calibration",
     )
+
+    # INT8_DEFAULT_CFG calibrates activations with MaxCalibrator, and this
+    # model has ~1e3-magnitude activation outliers (torchvision-ResNet BN
+    # channels in layer2): per-tensor scales set by those outliers collapse
+    # val mIoU from 0.833 to 0.18. Histogram + percentile clipping restores
+    # ~0.82 before fine-tuning even starts (measured, see docs/findings.md).
+    cfg = copy.deepcopy(mtq.INT8_DEFAULT_CFG)
+    for entry in cfg["quant_cfg"]:
+        if entry.get("quantizer_name") == "*input_quantizer":
+            entry["cfg"]["calibrator"] = "histogram"
+    # modelopt's built-in max-calib driver crashes on histogram calibrators
+    # (compute_amax() without a method), so calibration is driven manually.
+    cfg["algorithm"] = None
+
+    model = mtq.quantize(model, cfg, forward_loop=None)
+    enable_stats_collection(model)
+    model.eval()
+    with torch.no_grad():
+        for i, (x, _) in enumerate(train_dl):
+            if i >= args.calib_batches:
+                break
+            model(x.to(device))
+    for m in model.modules():
+        if not isinstance(m, TensorQuantizer) or getattr(m, "_disabled", False):
+            continue
+        cal = getattr(m, "_calibrator", None)
+        if cal is None:
+            continue
+        if isinstance(cal, HistogramCalibrator):
+            m.load_calib_amax("percentile", percentile=args.percentile)
+        elif cal.compute_amax() is not None:
+            m.load_calib_amax()
+        m.enable_quant()
+        m.disable_calib()
+
+    cm = evaluate(model, val_dl, device)
+    print(f"post-calibration (pre-QAT) val mIoU: {cm.miou():.4f}")
+    logger.log("calib_eval", miou=round(cm.miou(), 5))
+
+    criterion = nn.CrossEntropyLoss()
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
     # Plain FP32 fine-tuning (no AMP: keeps the fake-quant numerics simple).
     best = 0.0
