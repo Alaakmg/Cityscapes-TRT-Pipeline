@@ -22,7 +22,7 @@ Desktop = RTX 5090 (RunPod), TensorRT 10.16, torch 2.8.0+cu128. Raw JSONs in `re
 | TensorRT | FP32 | RTX 5090 | 0.8334 | ±0.0000 | 6.17 | 6.19 | 162 | 251 |
 | TensorRT | FP16 | RTX 5090 | 0.8334 | −0.0000 | 2.96 | 2.97 | 338 | 89 |
 | TensorRT | INT8 (PTQ) | RTX 5090 | 0.8246 | −0.0088 | 2.94 | 2.96 | 340 | 46 |
-| TensorRT | INT8 (QAT) | RTX 5090 | – | – | – | – | – | – |
+| TensorRT | INT8 (QAT) | RTX 5090 | 0.8290 | −0.0044 | 3.17 | 3.18 | 316 | 107 |
 | TensorRT | FP16 | Jetson Orin Nano | – | – | – | – | – | – |
 | TensorRT | INT8 (QAT) | Jetson Orin Nano | – | – | – | – | – | – |
 
@@ -123,7 +123,7 @@ python scripts/plot_training.py --run runs/fp32 --run runs/qat --out docs/curves
 - [x] FP32 baseline trained on Cityscapes (8 categories): val mIoU 0.833, 60 epochs
 - [x] ONNX export + numerical parity gate
 - [x] TensorRT FP32/FP16, accuracy measured on the engine itself
-- [ ] INT8: PTQ (entropy calibration), then QAT (Q/DQ export)
+- [x] INT8: PTQ (entropy calibration), then QAT (modelopt, Q/DQ export)
 - [ ] Jetson Orin Nano: on-device benchmarks, `trtexec` / Nsight profiling
 - [ ] C++ inference wrapper (`cpp/`), write-up
 

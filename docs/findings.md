@@ -61,6 +61,47 @@ most of the 0.9 while keeping the 46 MB engine, INT8 becomes strictly better
 than FP16 *on the Jetson* or it doesn't ship. That's the decision the numbers
 have to make.
 
+## QAT: the default calibration nearly ended the experiment
+
+modelopt's `INT8_DEFAULT_CFG` collapsed the model from 0.833 to **0.18 mIoU**
+before training even started. The trail, because the diagnosis is the finding:
+
+1. First QAT run "recovered" 0.54 -> 0.70 over 5 epochs. That trajectory is a
+   model re-learning from damaged weights, not fine-tuning: something broke at
+   the quantize step.
+2. Controlled experiment: checkpoint alone 0.8334; after `mtq.quantize` with
+   defaults, 0.1822. Quantize step guilty.
+3. The quantizer summary named the culprit: input activations on `layer2`
+   convs with **amax ~1.28e3** under per-tensor MaxCalibrator. Those are the
+   well-known torchvision-ResNet BN outlier channels; with int8 scales set by
+   a ~1300 outlier, ordinary O(1-10) activations collapse into one or two
+   quantization bins. More calibration data can't help - max only grows.
+4. Fix: histogram calibration with percentile clipping (99.9) for
+   activations, max for weights. Restores **0.8186** with zero training.
+   This is the same idea as TensorRT's entropy calibrator (which is why PTQ
+   never had this problem): rare outliers get saturated, the scale serves the
+   distribution instead of the extremes.
+5. QAT fine-tune from there: best 0.8289 at epoch 1 of 5 (later epochs drift
+   slightly - at lr 1e-5 there's nothing left to learn). The built engine
+   measures **0.8290** - the fake-quant model predicted its deployed accuracy
+   to under a tenth of a point, which is the whole promise of QAT.
+
+modelopt sharp edges hit on the way (v0.46): `quant_cfg` patterns are
+`*input_quantizer` (no trailing star) with settings nested under `cfg`, so a
+wrong pattern silently no-ops - assert your config applied; the stock max
+calibration driver crashes on histogram calibrators (`compute_amax()` without
+a method), so histogram calibration has to be driven manually via
+`enable_stats_collection` + per-quantizer `load_calib_amax`; and
+`modelopt.torch.opt` imports `huggingface_hub` unconditionally without
+declaring it.
+
+Scoreboard after QAT: **PTQ -0.88 pts, QAT -0.44 pts** vs FP32. But the QAT
+engine is bigger (107 vs 46 MB) and marginally slower (3.17 vs 2.94 ms) than
+implicit PTQ on desktop - explicit Q/DQ leaves more of the graph in high
+precision than TRT's implicit quantization chooses to. On the 5090, INT8-QAT
+buys accuracy, not speed. Whether any INT8 variant earns its keep is decided
+on the Jetson.
+
 ## Toolchain notes (the parts nobody's blog post mentions)
 
 - **TensorRT 11 removed `IInt8EntropyCalibrator2`** — implicit INT8

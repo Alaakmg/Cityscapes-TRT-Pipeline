@@ -1,0 +1,10 @@
+{
+  "onnx": "/workspace/runs/qat/model_qat.onnx",
+  "engine": "/workspace/results/model_int8_qat.engine",
+  "fp16": false,
+  "int8": true,
+  "calib_images": 500,
+  "engine_mb": 106.84,
+  "build_seconds": 70.1,
+  "trt_version": "10.16.1.11"
+}
