@@ -102,6 +102,83 @@ precision than TRT's implicit quantization chooses to. On the 5090, INT8-QAT
 buys accuracy, not speed. Whether any INT8 variant earns its keep is decided
 on the Jetson.
 
+## Jetson Orin Nano: where INT8 finally earns its keep
+
+JetPack 7.2.1, TensorRT 10.16.2, MAXN_SUPER with locked clocks (GPU 1.02 GHz,
+EMC 3.2 GHz). Same ONNX files as the desktop, engines built on the device.
+Power is module input (`VDD_IN`) from `tegrastats` at 2 Hz during the benchmark.
+
+| engine | mIoU | mean ms | p95 ms | img/s | MB | power | mJ/frame |
+|---|---|---|---|---|---|---|---|
+| FP32 | 0.8334 | 111.7 | 112.5 | 9.0 | 176 | 16.6 W | 1848 |
+| FP16 | 0.8334 | 41.6 | 42.4 | 24.1 | 88 | 15.2 W | 632 |
+| INT8-PTQ | 0.8236 | **22.9** | 23.6 | **43.6** | 45 | **11.7 W** | **268** |
+| INT8-QAT | 0.8290 | 34.3 | 35.0 | 29.1 | 45 | 13.0 W | 445 |
+
+The desktop said INT8 was pointless (2.94 vs 2.96 ms). The Jetson says the
+opposite: **INT8-PTQ is 1.8x faster than FP16 and 2.4x cheaper per frame in
+energy**, for one mIoU point. On a 68 GB/s device, halving the bytes moved per
+layer is the whole game; on a 1.8 TB/s desktop card it never was. That's the
+clearest argument I have for measuring on the target instead of extrapolating.
+Accuracy on-device matches the desktop to the 4th decimal for FP16 and QAT; PTQ
+lands at 0.8236 vs 0.8246 from the same calibration cache (TensorRT picked
+different kernels, the scales are identical).
+
+GPU temperature peaked at 66 C under sustained locked-clock load, 33 C below the
+throttle point. No thermal effect on any number.
+
+### What the profiler says (`trtexec --dumpProfile`)
+
+Transfers are not the problem. H2D 0.35-0.48 ms, D2H 0.83-0.94 ms per frame
+(the 16.8 MB FP32 logits tensor). My Python harness adds ~2.8 ms on top of
+trtexec's with-transfer latency (pageable numpy copies + sync); that's 12% at
+INT8 and worth fixing (pinned buffers, argmax on device to shrink the output
+32x) but it's not the bottleneck.
+
+**The decoder is.** FP16, per stage:
+
+| stage | ms | share |
+|---|---|---|
+| decoder (5 blocks) | 25.0 | 66% |
+| ResNet50 encoder | 12.1 | 32% |
+| head | 0.7 | 2% |
+
+The encoder holds nearly all the parameters and a third of the time. The
+decoder's first 3x3 conv in every block sits at the top of the profile
+(`dec4/conv1` alone: 5.1 ms, 13.6% - a 3x3 over 3072 concatenated channels;
+`dec0`/`dec1` run at full/half resolution on 512x1024). Those layers are
+memory-bound, which is also why INT8 helps them most. The architecture lever,
+if I wanted a faster model rather than a faster engine, is a thinner decoder:
+fewer channels in dec0/dec1 and a narrower dec4 input, not a smaller backbone.
+
+### Why the QAT engine is slower than PTQ (and how to fix it)
+
+Same 45 MB, identical per-conv times where they line up (dec4/conv1: 1.79 ms in
+both) - and yet 30.1 vs 18.8 ms of GPU time. The difference is all in the
+encoder: **13.8 ms over 100 layers (QAT) vs 6.5 ms over 58 layers (PTQ)**. The
+explicit-quantization graph from modelopt puts Q/DQ on conv inputs and weights
+but not on the residual-add inputs of the ResNet bottlenecks, so TensorRT cannot
+fuse conv + add + ReLU into one INT8 kernel: the add runs in higher precision
+as a separate layer, with re-quantization around it. NVIDIA's TensorRT docs
+call this out explicitly (quantize the residual branch), and the layer count
+is the fingerprint. Fix for the next QAT run: add quantizers on the residual
+path (and the decoder concat inputs), then the QAT engine should land near
+PTQ's 23 ms with its 0.829 mIoU - the best of both columns.
+
+### Platform notes
+
+- JetPack 7's ISO installer only updated the QSPI firmware on a *blank* microSD;
+  with an OS already present it skipped/stalled the capsule step, leaving a
+  39.x kernel on 36.x firmware (text console fine, GPU driver dead, no setup
+  wizard). Wipe the card, reinstall, watch both capsule passes complete.
+- The standard `torch` cu130 aarch64 wheel runs on Orin (sm_87) through PTX
+  JIT with a warning that 8.7 is not among the compiled targets. Fine here -
+  torch is only the CUDA allocator for the TensorRT runner - but for torch
+  compute on the device use NVIDIA's Jetson builds.
+- A DisplayPort-to-USB-C cable into a USB-C portable monitor does not work for
+  UEFI/installer output (no USB-C source handshake). Native DP or HDMI, or a
+  serial console on the 12-pin header.
+
 ## Toolchain notes (the parts nobody's blog post mentions)
 
 - **TensorRT 11 removed `IInt8EntropyCalibrator2`** — implicit INT8
@@ -124,6 +201,8 @@ on the Jetson.
 
 ## Next
 
-- QAT fine-tune (modelopt, Q/DQ export) — target: recover most of the −0.9.
-- Jetson Orin Nano: same table on the real target, `tegrastats` power numbers,
-  `trtexec`/Nsight profiling to find what actually bounds this network there.
+- QAT v2: quantize the residual-add and concat inputs so TensorRT can fuse the
+  bottlenecks; target ~23 ms at 0.829 mIoU on the Jetson.
+- Harness: pinned host buffers + on-device argmax (uint8 mask out instead of
+  FP32 logits), ~2-3 ms off the Jetson numbers; the C++ wrapper gets the same.
+- Thinner decoder as the architecture experiment the profile points at.
