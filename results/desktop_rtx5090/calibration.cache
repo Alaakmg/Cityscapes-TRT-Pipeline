@@ -1,0 +1,215 @@
+TRT-101601-EntropyCalibration2
+image: 3c9cdc9b
+/stem/stem.0/Conv_output_0: 3eb430d0
+/stem/stem.2/Relu_output_0: 3eb430d0
+/pool/MaxPool_output_0: 3eb430d0
+/layer1/layer1.0/conv1/Conv_output_0: 3e55d237
+/layer1/layer1.0/relu/Relu_output_0: 3e32f3e1
+/layer1/layer1.0/conv2/Conv_output_0: 3e7ee641
+/layer1/layer1.0/relu_1/Relu_output_0: 3e7e64f9
+/layer1/layer1.0/conv3/Conv_output_0: 3e48673f
+/layer1/layer1.0/downsample/downsample.0/Conv_output_0: 3e6fbd6a
+/layer1/layer1.0/Add_output_0: 3e7cbc43
+/layer1/layer1.0/relu_2/Relu_output_0: 3e0756d6
+/layer1/layer1.1/conv1/Conv_output_0: 3e6977ce
+/layer1/layer1.1/relu/Relu_output_0: 3e0fdb39
+/layer1/layer1.1/conv2/Conv_output_0: 3e7baaa4
+/layer1/layer1.1/relu_1/Relu_output_0: 3e8300ad
+/layer1/layer1.1/conv3/Conv_output_0: 3e4c1d41
+/layer1/layer1.1/Add_output_0: 3e4da4a9
+/layer1/layer1.1/relu_2/Relu_output_0: 3e0fd785
+/layer1/layer1.2/conv1/Conv_output_0: 3e5b363b
+/layer1/layer1.2/relu/Relu_output_0: 3e059bb3
+/layer1/layer1.2/conv2/Conv_output_0: 3e2f0913
+/layer1/layer1.2/relu_1/Relu_output_0: 3e15c8d1
+/layer1/layer1.2/conv3/Conv_output_0: 3f245be5
+/layer1/layer1.2/Add_output_0: 3f245be5
+/layer1/layer1.2/relu_2/Relu_output_0: 3f26e0bc
+/layer2/layer2.0/conv1/Conv_output_0: 3e800572
+/layer2/layer2.0/relu/Relu_output_0: 3e6bf11c
+/layer2/layer2.0/conv2/Conv_output_0: 3edffaf4
+/layer2/layer2.0/relu_1/Relu_output_0: 3edffaf4
+/layer2/layer2.0/conv3/Conv_output_0: 3f19888c
+/layer2/layer2.0/downsample/downsample.0/Conv_output_0: 3e9ae258
+/layer2/layer2.0/Add_output_0: 3edf5348
+/layer2/layer2.0/relu_2/Relu_output_0: 3edda084
+/layer2/layer2.1/conv1/Conv_output_0: 3f1a80d7
+/layer2/layer2.1/relu/Relu_output_0: 3f1e072f
+/layer2/layer2.1/conv2/Conv_output_0: 3ed6519e
+/layer2/layer2.1/relu_1/Relu_output_0: 3ecef087
+/layer2/layer2.1/conv3/Conv_output_0: 3f1e17e5
+/layer2/layer2.1/Add_output_0: 3f119315
+/layer2/layer2.1/relu_2/Relu_output_0: 3f0f68ed
+/layer2/layer2.2/conv1/Conv_output_0: 3f04fff6
+/layer2/layer2.2/relu/Relu_output_0: 3ed6b3a3
+/layer2/layer2.2/conv2/Conv_output_0: 3f001bef
+/layer2/layer2.2/relu_1/Relu_output_0: 3f020af7
+/layer2/layer2.2/conv3/Conv_output_0: 3f5699f7
+/layer2/layer2.2/Add_output_0: 3f0383f3
+/layer2/layer2.2/relu_2/Relu_output_0: 3eff3559
+/layer2/layer2.3/conv1/Conv_output_0: 3f0c1faf
+/layer2/layer2.3/relu/Relu_output_0: 3f0b10f5
+/layer2/layer2.3/conv2/Conv_output_0: 3edc87ec
+/layer2/layer2.3/relu_1/Relu_output_0: 3f1aaa15
+/layer2/layer2.3/conv3/Conv_output_0: 3f302a13
+/layer2/layer2.3/Add_output_0: 3ee694cd
+/layer2/layer2.3/relu_2/Relu_output_0: 3ee694cd
+/layer3/layer3.0/conv1/Conv_output_0: 3f00adf2
+/layer3/layer3.0/relu/Relu_output_0: 3e80adf2
+/layer3/layer3.0/conv2/Conv_output_0: 3ecc2e56
+/layer3/layer3.0/relu_1/Relu_output_0: 3eccc9e0
+/layer3/layer3.0/conv3/Conv_output_0: 3ee27bd6
+/layer3/layer3.0/downsample/downsample.0/Conv_output_0: 3ea7d96a
+/layer3/layer3.0/Add_output_0: 3f3d7867
+/layer3/layer3.0/relu_2/Relu_output_0: 3f37cb16
+/layer3/layer3.1/conv1/Conv_output_0: 3eb6a89e
+/layer3/layer3.1/relu/Relu_output_0: 3e94d797
+/layer3/layer3.1/conv2/Conv_output_0: 3ece0fdc
+/layer3/layer3.1/relu_1/Relu_output_0: 3ea24aea
+/layer3/layer3.1/conv3/Conv_output_0: 3f31236e
+/layer3/layer3.1/Add_output_0: 3f0d9a0a
+/layer3/layer3.1/relu_2/Relu_output_0: 3f084c5c
+/layer3/layer3.2/conv1/Conv_output_0: 3e65dad7
+/layer3/layer3.2/relu/Relu_output_0: 3e6540f3
+/layer3/layer3.2/conv2/Conv_output_0: 3ea6ab90
+/layer3/layer3.2/relu_1/Relu_output_0: 3e1f6a0d
+/layer3/layer3.2/conv3/Conv_output_0: 3ee09bc9
+/layer3/layer3.2/Add_output_0: 3f0083b5
+/layer3/layer3.2/relu_2/Relu_output_0: 3ef953e5
+/layer3/layer3.3/conv1/Conv_output_0: 3e61c5b2
+/layer3/layer3.3/relu/Relu_output_0: 3e61c5b2
+/layer3/layer3.3/conv2/Conv_output_0: 3e7976c7
+/layer3/layer3.3/relu_1/Relu_output_0: 3df5b2cf
+/layer3/layer3.3/conv3/Conv_output_0: 3e975dd7
+/layer3/layer3.3/Add_output_0: 3ec671ab
+/layer3/layer3.3/relu_2/Relu_output_0: 3ec671ab
+/layer3/layer3.4/conv1/Conv_output_0: 3e4634b1
+/layer3/layer3.4/relu/Relu_output_0: 3e49386b
+/layer3/layer3.4/conv2/Conv_output_0: 3e696507
+/layer3/layer3.4/relu_1/Relu_output_0: 3e0675e3
+/layer3/layer3.4/conv3/Conv_output_0: 3e37aa53
+/layer3/layer3.4/Add_output_0: 3eaa5a89
+/layer3/layer3.4/relu_2/Relu_output_0: 3e8ca7e5
+/layer3/layer3.5/conv1/Conv_output_0: 3e3382c4
+/layer3/layer3.5/relu/Relu_output_0: 3e3382c4
+/layer3/layer3.5/conv2/Conv_output_0: 3e57e43a
+/layer3/layer3.5/relu_1/Relu_output_0: 3e5e8246
+/layer3/layer3.5/conv3/Conv_output_0: 3e41c8b9
+/layer3/layer3.5/Add_output_0: 3e3ee70c
+/layer3/layer3.5/relu_2/Relu_output_0: 3ddcf416
+/layer4/layer4.0/conv1/Conv_output_0: 3e697ecd
+/layer4/layer4.0/relu/Relu_output_0: 3e16c6d1
+/layer4/layer4.0/conv2/Conv_output_0: 3de4624a
+/layer4/layer4.0/relu_1/Relu_output_0: 3dde40be
+/layer4/layer4.0/conv3/Conv_output_0: 3e61b79c
+/layer4/layer4.0/downsample/downsample.0/Conv_output_0: 3e902620
+/layer4/layer4.0/Add_output_0: 3ea6c8d8
+/layer4/layer4.0/relu_2/Relu_output_0: 3ea62263
+/layer4/layer4.1/conv1/Conv_output_0: 3e14a8bb
+/layer4/layer4.1/relu/Relu_output_0: 3e0e67e0
+/layer4/layer4.1/conv2/Conv_output_0: 3e3debb9
+/layer4/layer4.1/relu_1/Relu_output_0: 3e0c7ca3
+/layer4/layer4.1/conv3/Conv_output_0: 3e9a648f
+/layer4/layer4.1/Add_output_0: 3e942ca2
+/layer4/layer4.1/relu_2/Relu_output_0: 3e8ad3db
+/layer4/layer4.2/conv1/Conv_output_0: 3eca0a3a
+/layer4/layer4.2/relu/Relu_output_0: 3e028a79
+/layer4/layer4.2/conv2/Conv_output_0: 3e575aef
+/layer4/layer4.2/relu_1/Relu_output_0: 3df24065
+/layer4/layer4.2/conv3/Conv_output_0: 3e6ec19e
+/layer4/layer4.2/Add_output_0: 3e6ec19e
+/layer4/layer4.2/relu_2/Relu_output_0: 3e46dcaa
+/dec4/Resize_output_0: 3e46dcaa
+/dec4/Concat_output_0: 3e28039d
+/dec4/conv1/conv1.0/Conv_output_0: 3db0f85b
+/dec4/conv1/conv1.2/Relu_output_0: 3da6a338
+/dec4/conv2/conv2.0/Conv_output_0: 3da35b52
+/dec4/conv2/conv2.2/Relu_output_0: 3da61b3d
+/dec3/Resize_output_0: 3da61b3d
+/dec3/Concat_output_0: 3ee694cd
+/dec3/conv1/conv1.0/Conv_output_0: 3d9549d1
+/dec3/conv1/conv1.2/Relu_output_0: 3d936e67
+/dec3/conv2/conv2.0/Conv_output_0: 3da2a060
+/dec3/conv2/conv2.2/Relu_output_0: 3db82e6a
+/dec2/Resize_output_0: 3db82e6a
+/dec2/Concat_output_0: 3f26e0bc
+/dec2/conv1/conv1.0/Conv_output_0: 3dacd254
+/dec2/conv1/conv1.2/Relu_output_0: 3dae8afc
+/dec2/conv2/conv2.0/Conv_output_0: 3da328da
+/dec2/conv2/conv2.2/Relu_output_0: 3da9db1e
+/dec1/Resize_output_0: 3da9db1e
+/dec1/Concat_output_0: 3eb430d0
+/dec1/conv1/conv1.0/Conv_output_0: 3d99efd1
+/dec1/conv1/conv1.2/Relu_output_0: 3d9b7853
+/dec1/conv2/conv2.0/Conv_output_0: 3d9af95f
+/dec1/conv2/conv2.2/Relu_output_0: 3d6ae6b9
+/dec0/Resize_output_0: 3d6ae6b9
+/dec0/conv1/conv1.0/Conv_output_0: 3d64267a
+/dec0/conv1/conv1.2/Relu_output_0: 3d1f311e
+/dec0/conv2/conv2.0/Conv_output_0: 3d8a4880
+/dec0/conv2/conv2.2/Relu_output_0: 3d8f0f2e
+logits: 3de1c149
+/stem/stem.0/Conv expanded_const_filter: 3f800000
+/layer1/layer1.0/conv1/Conv expanded_const_filter: 3f800000
+/layer1/layer1.0/conv2/Conv expanded_const_filter: 3f800000
+/layer1/layer1.0/conv3/Conv expanded_const_filter: 3f800000
+/layer1/layer1.0/downsample/downsample.0/Conv expanded_const_filter: 3f800000
+/layer1/layer1.1/conv1/Conv expanded_const_filter: 3f800000
+/layer1/layer1.1/conv2/Conv expanded_const_filter: 3f800000
+/layer1/layer1.1/conv3/Conv expanded_const_filter: 3f800000
+/layer1/layer1.2/conv1/Conv expanded_const_filter: 3f800000
+/layer1/layer1.2/conv2/Conv expanded_const_filter: 3f800000
+/layer1/layer1.2/conv3/Conv expanded_const_filter: 3f800000
+/layer2/layer2.0/conv1/Conv expanded_const_filter: 3f800000
+/layer2/layer2.0/conv2/Conv expanded_const_filter: 3f800000
+/layer2/layer2.0/conv3/Conv expanded_const_filter: 3f800000
+/layer2/layer2.0/downsample/downsample.0/Conv expanded_const_filter: 3f800000
+/layer2/layer2.1/conv1/Conv expanded_const_filter: 3f800000
+/layer2/layer2.1/conv2/Conv expanded_const_filter: 3f800000
+/layer2/layer2.1/conv3/Conv expanded_const_filter: 3f800000
+/layer2/layer2.2/conv1/Conv expanded_const_filter: 3f800000
+/layer2/layer2.2/conv2/Conv expanded_const_filter: 3f800000
+/layer2/layer2.2/conv3/Conv expanded_const_filter: 3f800000
+/layer2/layer2.3/conv1/Conv expanded_const_filter: 3f800000
+/layer2/layer2.3/conv2/Conv expanded_const_filter: 3f800000
+/layer2/layer2.3/conv3/Conv expanded_const_filter: 3f800000
+/layer3/layer3.0/conv1/Conv expanded_const_filter: 3f800000
+/layer3/layer3.0/conv2/Conv expanded_const_filter: 3f800000
+/layer3/layer3.0/conv3/Conv expanded_const_filter: 3f800000
+/layer3/layer3.0/downsample/downsample.0/Conv expanded_const_filter: 3f800000
+/layer3/layer3.1/conv1/Conv expanded_const_filter: 3f800000
+/layer3/layer3.1/conv2/Conv expanded_const_filter: 3f800000
+/layer3/layer3.1/conv3/Conv expanded_const_filter: 3f800000
+/layer3/layer3.2/conv1/Conv expanded_const_filter: 3f800000
+/layer3/layer3.2/conv2/Conv expanded_const_filter: 3f800000
+/layer3/layer3.2/conv3/Conv expanded_const_filter: 3f800000
+/layer3/layer3.3/conv1/Conv expanded_const_filter: 3f800000
+/layer3/layer3.3/conv2/Conv expanded_const_filter: 3f800000
+/layer3/layer3.3/conv3/Conv expanded_const_filter: 3f800000
+/layer3/layer3.4/conv1/Conv expanded_const_filter: 3f800000
+/layer3/layer3.4/conv2/Conv expanded_const_filter: 3f800000
+/layer3/layer3.4/conv3/Conv expanded_const_filter: 3f800000
+/layer3/layer3.5/conv1/Conv expanded_const_filter: 3f800000
+/layer3/layer3.5/conv2/Conv expanded_const_filter: 3f800000
+/layer3/layer3.5/conv3/Conv expanded_const_filter: 3f800000
+/layer4/layer4.0/conv1/Conv expanded_const_filter: 3f800000
+/layer4/layer4.0/conv2/Conv expanded_const_filter: 3f800000
+/layer4/layer4.0/conv3/Conv expanded_const_filter: 3f800000
+/layer4/layer4.0/downsample/downsample.0/Conv expanded_const_filter: 3f800000
+/layer4/layer4.1/conv1/Conv expanded_const_filter: 3f800000
+/layer4/layer4.1/conv2/Conv expanded_const_filter: 3f800000
+/layer4/layer4.1/conv3/Conv expanded_const_filter: 3f800000
+/layer4/layer4.2/conv1/Conv expanded_const_filter: 3f800000
+/layer4/layer4.2/conv2/Conv expanded_const_filter: 3f800000
+/layer4/layer4.2/conv3/Conv expanded_const_filter: 3f800000
+/dec4/conv1/conv1.0/Conv expanded_const_filter: 3f800000
+/dec4/conv2/conv2.0/Conv expanded_const_filter: 3f800000
+/dec3/conv1/conv1.0/Conv expanded_const_filter: 3f800000
+/dec3/conv2/conv2.0/Conv expanded_const_filter: 3f800000
+/dec2/conv1/conv1.0/Conv expanded_const_filter: 3f800000
+/dec2/conv2/conv2.0/Conv expanded_const_filter: 3f800000
+/dec1/conv1/conv1.0/Conv expanded_const_filter: 3f800000
+/dec1/conv2/conv2.0/Conv expanded_const_filter: 3f800000
+/dec0/conv1/conv1.0/Conv expanded_const_filter: 3f800000
+/dec0/conv2/conv2.0/Conv expanded_const_filter: 3f800000
+/head/Conv expanded_const_filter: 3f800000
