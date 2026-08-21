@@ -95,7 +95,7 @@ def build(args) -> None:
                 p = fmt.split()[0] if fmt else "?"
             precisions[p] = precisions.get(p, 0) + 1
     print(f"layer precisions: {precisions}")
-    if args.int8 and precisions.get("INT8", 0) == 0:
+    if args.int8 and not any(k.lower() == "int8" for k in precisions):
         print("WARNING: --int8 requested but no layer runs in INT8 (calibration cache "
               "tensor names probably don't match this graph)")
 
