@@ -61,8 +61,10 @@ def main() -> None:
     for i, (x, y) in enumerate(tqdm(dl)):
         if args.limit and i >= args.limit:
             break
-        logits = runner(x.numpy().astype(np.float32))
-        cm.update(y.numpy(), logits.argmax(1))
+        out = runner(x.numpy().astype(np.float32))
+        # logits (N, C, H, W) -> argmax here; argmax-head engines return (N, H, W)
+        pred = out.argmax(1) if out.ndim == 4 else out
+        cm.update(y.numpy(), pred)
 
     print(cm.summary(CATEGORY_NAMES))
 
