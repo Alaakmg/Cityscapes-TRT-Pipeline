@@ -12,26 +12,34 @@ import argparse
 
 import onnx
 import torch
-from torch import nn
 
 from segdeploy.model import build_model
 
 
-class ArgmaxHead(nn.Module):
-    """Fold the class decision into the graph: (N, C, H, W) logits -> (N, H, W) int32.
+def add_argmax_output(model: onnx.ModelProto) -> onnx.ModelProto:
+    """Append ArgMax + Cast(int32) to an exported logits graph, in place.
 
-    On a bandwidth-bound device the 16.8 MB FP32 logits tensor coming back
-    every frame is pure waste when all the consumer wants is the mask; the
-    int32 mask is 8x smaller (int64 is what ONNX ArgMax emits, TensorRT runs
-    it as int32).
+    (N, C, H, W) logits -> (N, H, W) int32 mask. On a bandwidth-bound device
+    the 16.8 MB FP32 logits tensor coming back every frame is waste when the
+    consumer only wants the mask; int32 is 8x smaller.
+
+    Done as graph surgery on the existing export rather than by wrapping the
+    torch module: wrapping renames every tensor (/model/... prefix), which
+    silently invalidates an INT8 calibration cache and TensorRT then builds an
+    all-FP16 engine without complaint. Surgery keeps the names, so the cache
+    built for the logits graph applies unchanged.
     """
-
-    def __init__(self, model: nn.Module):
-        super().__init__()
-        self.model = model
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.model(x).argmax(dim=1).to(torch.int32)
+    g = model.graph
+    assert len(g.output) == 1, "expected a single logits output"
+    logits = g.output[0]
+    n, _c, h, w = [d.dim_value for d in logits.type.tensor_type.shape.dim]
+    g.node.extend([
+        onnx.helper.make_node("ArgMax", [logits.name], ["mask_i64"], axis=1, keepdims=0),
+        onnx.helper.make_node("Cast", ["mask_i64"], ["mask"], to=onnx.TensorProto.INT32),
+    ])
+    del g.output[:]
+    g.output.append(onnx.helper.make_tensor_value_info("mask", onnx.TensorProto.INT32, [n, h, w]))
+    return model
 
 
 def main() -> None:
@@ -47,8 +55,6 @@ def main() -> None:
     model = build_model(pretrained=False).eval()
     state = torch.load(args.checkpoint, map_location="cpu")
     model.load_state_dict(state.get("model", state))
-    if args.argmax:
-        model = ArgmaxHead(model).eval()
 
     dummy = torch.randn(1, 3, args.height, args.width)
     torch.onnx.export(
@@ -57,12 +63,15 @@ def main() -> None:
         args.out,
         opset_version=args.opset,
         input_names=["image"],
-        output_names=["mask" if args.argmax else "logits"],
+        output_names=["logits"],
         do_constant_folding=True,
         dynamo=False,
     )
 
     m = onnx.load(args.out)
+    if args.argmax:
+        m = add_argmax_output(m)
+        onnx.save(m, args.out)
     onnx.checker.check_model(m)
     print(f"Exported and checked: {args.out}")
     print(f"  inputs : {[(i.name, [d.dim_value for d in i.type.tensor_type.shape.dim]) for i in m.graph.input]}")

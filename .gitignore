@@ -9,3 +9,6 @@ runs/
 data/
 datasets/
 .DS_Store
+*.pt
+*.pth
+models/
