@@ -124,6 +124,44 @@ different kernels, the scales are identical).
 GPU temperature peaked at 66 C under sustained locked-clock load, 33 C below the
 throttle point. No thermal effect on any number.
 
+### Power-mode sweep: precision sets the energy, the mode sets the frame rate
+
+All four engines at 15 W (GPU 612 MHz / EMC 2133), 25 W (918 / 3199) and
+MAXN_SUPER (1020 / 3199), each with clocks locked and with the stock DVFS
+governor. 24 runs, full table in `results/jetson_orin_nano/sweep/summary.json`.
+
+![power modes](jetson_power_modes.png)
+
+| locked clocks | 15 W | 25 W | MAXN_SUPER |
+|---|---|---|---|
+| FP32 | 179.7 ms, 1878 mJ | 121.5 ms, 1832 mJ | 111.5 ms, 1862 mJ |
+| FP16 | 64.9 ms, 645 mJ | 44.2 ms, 606 mJ | 41.5 ms, 621 mJ |
+| INT8-PTQ | 36.0 ms, 283 mJ | 25.0 ms, 258 mJ | 22.9 ms, 261 mJ |
+| INT8-QAT | 54.2 ms, 482 mJ | 37.1 ms, 441 mJ | 34.3 ms, 443 mJ |
+
+Three things I did not expect to be this clean:
+
+1. **Energy per frame barely moves with power mode.** INT8-PTQ costs ~260-280 mJ
+   per frame at every mode; FP16 ~600-650. The modes trade latency for power
+   almost linearly, so the energy bill is a property of the precision. If the
+   budget is joules (battery), pick the precision; if it is milliseconds, pick
+   the mode.
+2. **The INT8 advantage is constant.** 1.77-1.81x faster and 2.3-2.4x less
+   energy than FP16 at all three modes. Not a Super-mode artifact.
+3. **Super mode buys latency, not efficiency.** Vs 25 W it is 6-8% faster
+   (GPU clock +11%, memory clock unchanged; the workload is partly
+   memory-bound, so it doesn't scale with GPU clock) at ~10% more power, same
+   mJ/frame.
+
+Decision table for a 30 fps target: INT8-PTQ at 25 W (40 fps, 10.3 W) is the
+answer; FP16 never gets there, even at MAXN_SUPER (24 fps). INT8-QAT at
+MAXN_SUPER just misses (29 fps); the residual-quantization fix below is
+aimed at that.
+
+DVFS vs locked clocks: means within 1-4%, p95 a little wider under DVFS (INT8 at
+MAXN_SUPER: 25.4 vs 23.6 ms). A 20-iteration warm-up is enough for the governor
+to ramp; locking clocks mostly buys tail determinism, and that is what I report.
+
 ### What the profiler says (`trtexec --dumpProfile`)
 
 Transfers are not the problem. H2D 0.35-0.48 ms, D2H 0.83-0.94 ms per frame

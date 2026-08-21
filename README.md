@@ -41,6 +41,18 @@ Jetson: INT8-PTQ is 1.8x faster than FP16 and 2.4x more energy-efficient
 the other way; the Jetson is the device that ships. Details and the profiling
 breakdown in [`docs/findings.md`](docs/findings.md).
 
+Power-mode sweep (all engines, 15 W / 25 W / MAXN_SUPER, clocks locked and DVFS):
+energy per frame is set by the precision, the power mode only moves latency.
+INT8-PTQ is the only configuration above 30 fps at 25 W.
+
+![jetson power modes](docs/jetson_power_modes.png)
+
+| Jetson, clocks locked | 15 W | 25 W | MAXN_SUPER |
+|---|---|---|---|
+| FP16 ms / fps / W / mJ per frame | 64.9 / 15.4 / 9.9 / 645 | 44.2 / 22.6 / 13.7 / 606 | 41.5 / 24.1 / 15.0 / 621 |
+| INT8-PTQ ms / fps / W / mJ per frame | 36.0 / 27.8 / 7.9 / 283 | 25.0 / 40.0 / 10.3 / 258 | 22.9 / 43.6 / 11.4 / 261 |
+| INT8 vs FP16 | 1.80x faster, 2.3x less energy | 1.77x, 2.3x | 1.81x, 2.4x |
+
 INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but no
 latency win over FP16 at batch 1 on the 5090. The workload isn't INT8-math-bound
 there; the INT8 case rests on the bandwidth-starved Jetson. Degradation is spread
