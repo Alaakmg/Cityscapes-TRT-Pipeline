@@ -1,10 +1,14 @@
 {
+  "layer_precisions": {
+    "Int8": 77,
+    "Float": 1
+  },
   "onnx": "/home/alaakmg/models/model.onnx",
   "engine": "/home/alaakmg/results/model_int8_ptq.engine",
   "fp16": false,
   "int8": true,
   "calib_images": 500,
   "engine_mb": 44.97,
-  "build_seconds": 349.9,
+  "build_seconds": 349.1,
   "trt_version": "10.16.2.10"
 }
