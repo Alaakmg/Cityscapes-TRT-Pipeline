@@ -38,6 +38,9 @@ def build(args) -> None:
 
     config = builder.create_builder_config()
     config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, args.workspace_gb << 30)
+    # Needed for the engine inspector to report per-layer precision (otherwise
+    # it only returns layer names). Slightly larger engine, no runtime cost.
+    config.profiling_verbosity = trt.ProfilingVerbosity.DETAILED
 
     if args.fp16:
         config.set_flag(trt.BuilderFlag.FP16)
@@ -83,7 +86,13 @@ def build(args) -> None:
         insp = engine.create_engine_inspector()
         info = json.loads(insp.get_engine_information(trt.LayerInformationFormat.JSON))
         for layer in info.get("Layers", []):
-            p = layer.get("Precision") or layer.get("TacticValue", "?")
+            if not isinstance(layer, dict):  # no DETAILED verbosity: names only
+                continue
+            p = layer.get("Precision")
+            if not p:  # fall back to the first output tensor's datatype
+                outs = layer.get("Outputs") or []
+                fmt = outs[0].get("Format/Datatype", "?") if outs else "?"
+                p = fmt.split()[0] if fmt else "?"
             precisions[p] = precisions.get(p, 0) + 1
     print(f"layer precisions: {precisions}")
     if args.int8 and precisions.get("INT8", 0) == 0:
