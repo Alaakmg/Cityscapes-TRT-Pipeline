@@ -14,7 +14,11 @@ Accuracy is always measured on the deployed artifact itself
 (`python -m segdeploy.evaluate --backend ...`), never on the source PyTorch model.
 Latency: batch 1, 512x1024, 20 warmup + 200 timed iterations, explicit device sync.
 
-Desktop = RTX 5090 (RunPod), TensorRT 10.16, torch 2.8.0+cu128. Raw JSONs in `results/`.
+Desktop = RTX 5090 (RunPod), TensorRT 10.16.1, torch 2.8.0+cu128.
+Jetson = Orin Nano Super 8 GB, JetPack 7.2.1 (L4T R39.2.1, TensorRT 10.16.2, CUDA 13.2),
+power mode MAXN_SUPER with `jetson_clocks` (GPU locked 1.02 GHz, EMC 3.2 GHz).
+Jetson power = module input (`VDD_IN`) sampled by `tegrastats` at 2 Hz during the benchmark.
+Raw JSONs, tegrastats logs and `trtexec` layer profiles in `results/`.
 
 | Variant | Precision | Device | mIoU | Δ vs FP32 | Latency mean (ms) | p95 (ms) | img/s | Size (MB) |
 |---|---|---|---|---|---|---|---|---|
@@ -23,12 +27,19 @@ Desktop = RTX 5090 (RunPod), TensorRT 10.16, torch 2.8.0+cu128. Raw JSONs in `re
 | TensorRT | FP16 | RTX 5090 | 0.8334 | −0.0000 | 2.96 | 2.97 | 338 | 89 |
 | TensorRT | INT8 (PTQ) | RTX 5090 | 0.8246 | −0.0088 | 2.94 | 2.96 | 340 | 46 |
 | TensorRT | INT8 (QAT) | RTX 5090 | 0.8290 | −0.0044 | 3.17 | 3.18 | 316 | 107 |
-| TensorRT | FP16 | Jetson Orin Nano | – | – | – | – | – | – |
-| TensorRT | INT8 (QAT) | Jetson Orin Nano | – | – | – | – | – | – |
+| TensorRT | FP32 | Jetson Orin Nano | 0.8334 | ±0.0000 | 111.7 | 112.5 | 9.0 | 176 |
+| TensorRT | FP16 | Jetson Orin Nano | 0.8334 | −0.0000 | 41.6 | 42.4 | 24.1 | 88 |
+| TensorRT | INT8 (PTQ) | Jetson Orin Nano | 0.8236 | −0.0098 | **22.9** | 23.6 | **43.6** | 45 |
+| TensorRT | INT8 (QAT) | Jetson Orin Nano | 0.8290 | −0.0044 | 34.3 | 35.0 | 29.1 | 45 |
 
 FP16 so far: 3.2x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
 parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).
+
+Jetson: INT8-PTQ is 1.8x faster than FP16 and 2.4x more energy-efficient
+(268 vs 632 mJ/frame) for −1.0 mIoU point. The desktop table alone argues
+the other way; the Jetson is the device that ships. Details and the profiling
+breakdown in [`docs/findings.md`](docs/findings.md).
 
 INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but no
 latency win over FP16 at batch 1 on the 5090. The workload isn't INT8-math-bound
@@ -124,7 +135,7 @@ python scripts/plot_training.py --run runs/fp32 --run runs/qat --out docs/curves
 - [x] ONNX export + numerical parity gate
 - [x] TensorRT FP32/FP16, accuracy measured on the engine itself
 - [x] INT8: PTQ (entropy calibration), then QAT (modelopt, Q/DQ export)
-- [ ] Jetson Orin Nano: on-device benchmarks, `trtexec` / Nsight profiling
+- [x] Jetson Orin Nano: on-device benchmarks, power, `trtexec` layer profiling
 
 ## Dataset
 

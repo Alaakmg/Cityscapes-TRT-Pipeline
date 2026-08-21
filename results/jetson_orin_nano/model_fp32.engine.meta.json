@@ -1,0 +1,10 @@
+{
+  "onnx": "/home/alaakmg/models/model.onnx",
+  "engine": "/home/alaakmg/results/model_fp32.engine",
+  "fp16": false,
+  "int8": false,
+  "calib_images": null,
+  "engine_mb": 176.08,
+  "build_seconds": 157.5,
+  "trt_version": "10.16.2.10"
+}
