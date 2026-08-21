@@ -129,6 +129,9 @@ python scripts/plot_training.py --run runs/fp32 --run runs/qat --out docs/curves
 
 ## Design notes
 
+The full decision log, with context and consequences for each choice, is in
+[`docs/adr.md`](docs/adr.md). Short version:
+
 - **Static input shape (1x3x512x1024).** Cameras run at a fixed resolution anyway,
   and static shapes keep TensorRT profiles and INT8 calibration simple. The cost is
   one engine per resolution, which I can live with.
