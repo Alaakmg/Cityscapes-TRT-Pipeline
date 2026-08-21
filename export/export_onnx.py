@@ -12,8 +12,26 @@ import argparse
 
 import onnx
 import torch
+from torch import nn
 
 from segdeploy.model import build_model
+
+
+class ArgmaxHead(nn.Module):
+    """Fold the class decision into the graph: (N, C, H, W) logits -> (N, H, W) int32.
+
+    On a bandwidth-bound device the 16.8 MB FP32 logits tensor coming back
+    every frame is pure waste when all the consumer wants is the mask; the
+    int32 mask is 8x smaller (int64 is what ONNX ArgMax emits, TensorRT runs
+    it as int32).
+    """
+
+    def __init__(self, model: nn.Module):
+        super().__init__()
+        self.model = model
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x).argmax(dim=1).to(torch.int32)
 
 
 def main() -> None:
@@ -23,11 +41,14 @@ def main() -> None:
     ap.add_argument("--height", type=int, default=512)
     ap.add_argument("--width", type=int, default=1024)
     ap.add_argument("--opset", type=int, default=17)
+    ap.add_argument("--argmax", action="store_true", help="Export the class mask instead of logits")
     args = ap.parse_args()
 
     model = build_model(pretrained=False).eval()
     state = torch.load(args.checkpoint, map_location="cpu")
     model.load_state_dict(state.get("model", state))
+    if args.argmax:
+        model = ArgmaxHead(model).eval()
 
     dummy = torch.randn(1, 3, args.height, args.width)
     torch.onnx.export(
@@ -36,7 +57,7 @@ def main() -> None:
         args.out,
         opset_version=args.opset,
         input_names=["image"],
-        output_names=["logits"],
+        output_names=["mask" if args.argmax else "logits"],
         do_constant_folding=True,
         dynamo=False,
     )
