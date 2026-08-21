@@ -74,8 +74,25 @@ def build(args) -> None:
     Path(args.out).write_bytes(serialized)
     print(f"Saved {args.out} ({size_mb:.1f} MB)")
 
+    # Per-precision layer histogram from the engine inspector. An INT8 build
+    # whose calibration cache didn't match any tensor name silently falls back
+    # to FP16 for every layer; this makes that visible (and persisted).
+    precisions = {}
+    with trt.Runtime(logger) as runtime:
+        engine = runtime.deserialize_cuda_engine(serialized)
+        insp = engine.create_engine_inspector()
+        info = json.loads(insp.get_engine_information(trt.LayerInformationFormat.JSON))
+        for layer in info.get("Layers", []):
+            p = layer.get("Precision") or layer.get("TacticValue", "?")
+            precisions[p] = precisions.get(p, 0) + 1
+    print(f"layer precisions: {precisions}")
+    if args.int8 and precisions.get("INT8", 0) == 0:
+        print("WARNING: --int8 requested but no layer runs in INT8 (calibration cache "
+              "tensor names probably don't match this graph)")
+
     # engines are disposable/device-specific, keep the build facts next to them
     meta = {
+        "layer_precisions": precisions,
         "onnx": args.onnx,
         "engine": args.out,
         "fp16": args.fp16,
