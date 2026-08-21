@@ -1,0 +1,14 @@
+{
+  "layer_precisions": {
+    "Half": 88,
+    "Int32": 1
+  },
+  "onnx": "/home/alaakmg/models/model_argmax.onnx",
+  "engine": "/home/alaakmg/results/model_fp16_argmax.engine",
+  "fp16": true,
+  "int8": false,
+  "calib_images": null,
+  "engine_mb": 88.37,
+  "build_seconds": 213.8,
+  "trt_version": "10.16.2.10"
+}

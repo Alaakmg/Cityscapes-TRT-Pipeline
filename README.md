@@ -32,6 +32,11 @@ Raw JSONs, tegrastats logs and `trtexec` layer profiles in `results/`.
 | TensorRT | INT8 (PTQ) | Jetson Orin Nano | 0.8236 | −0.0098 | **22.9** | 23.6 | **43.6** | 45 |
 | TensorRT | INT8 (QAT) | Jetson Orin Nano | 0.8290 | −0.0044 | 34.3 | 35.0 | 29.1 | 45 |
 
+Harness v2 (pinned host buffers, same engines, same clocks) takes ~2.5 ms off every
+Jetson row: FP16 38.9 ms, **INT8-PTQ 20.4 ms / 49 img/s**, INT8-QAT 31.8 ms / 31.5 img/s.
+The table above keeps the v1 numbers until the desktop rows are re-measured the same way.
+Details and the on-device-argmax non-result in [`docs/findings.md`](docs/findings.md).
+
 FP16 so far: **3.2x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss**
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
 parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).

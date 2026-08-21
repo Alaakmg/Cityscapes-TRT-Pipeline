@@ -217,6 +217,55 @@ PTQ's 23 ms with its 0.829 mIoU - the best of both columns.
   UEFI/installer output (no USB-C source handshake). Native DP or HDMI, or a
   serial console on the 12-pin header.
 
+## Harness optimization: pinned buffers pay, on-device argmax doesn't (here)
+
+The Jetson profile said my Python harness added ~2.8 ms per frame over
+`trtexec`, and that the 16.8 MB FP32 logits tensor came back every frame. Two
+fixes, measured separately on the same engines at the same locked clocks:
+
+| Jetson, MAXN_SUPER | v1 harness | + pinned host buffers | + argmax head | trtexec w/ transfers |
+|---|---|---|---|---|
+| FP32 | 111.5 | 108.8 | - | - |
+| FP16 | 41.5 | **38.9** | 38.7 | 38.0 |
+| INT8-PTQ | 22.9 | **20.4** | 20.5 | 19.8 |
+| INT8-QAT | 34.3 | **31.8** | - | - |
+
+**Pinned host buffers: -2.5 ms on every engine** (11% at INT8), landing within
+0.6 ms of trtexec. Pageable numpy arrays force the driver to stage every copy
+through an internal pinned buffer; allocating the host side as pinned torch
+tensors and copying on a private stream makes H2D/D2H true async DMA. That is
+the whole win, and INT8-QAT crosses 30 fps because of it.
+
+**On-device argmax: a wash at batch 1.** The D2H copy drops from 0.94 to 0.08
+ms as predicted (int32 mask instead of FP32 logits, 8x smaller), but the
+ArgMax layer costs ~0.7 ms of GPU time - it's a full-resolution reduction over
+8 channels, memory-bound like everything else here. Net zero. I'm keeping the
+export because a real consumer wants the mask, not the logits, and on a
+discrete GPU the same 16.8 MB crosses PCIe instead of unified memory; but it
+is not a latency optimization on this board, and I'd rather record that than
+pretend.
+
+A trap on the way, worth more than the optimization: my first argmax export
+wrapped the torch module, which prefixed every ONNX tensor name with
+`/model/`. The INT8 calibration cache is keyed by tensor name, so nothing
+matched, TensorRT had no scales, and with the FP16 fallback flag set it built
+an all-FP16 engine without a word - 88 MB, FP16 speed, FP16 accuracy, labelled
+int8. Two fixes: the argmax is now appended to the existing ONNX graph
+(names preserved, asserted by a test), and `build_engine.py` builds with
+`ProfilingVerbosity.DETAILED` and persists a per-precision layer histogram
+from the engine inspector, warning when an `--int8` build has no INT8 layers.
+
+That histogram also put a number on the QAT problem:
+
+| engine | Int8 | Half | Float |
+|---|---|---|---|
+| FP16 | 0 | 85 | 1 |
+| INT8-PTQ | 77 | 0 | 1 |
+| INT8-QAT | 84 | **48** | 5 |
+
+48 layers of the QAT engine run in FP16 - the unquantized residual paths and
+the re-quantization around them. That is the target for QAT v2.
+
 ## Toolchain notes (the parts nobody's blog post mentions)
 
 - **TensorRT 11 removed `IInt8EntropyCalibrator2`** — implicit INT8
@@ -241,6 +290,6 @@ PTQ's 23 ms with its 0.829 mIoU - the best of both columns.
 
 - QAT v2: quantize the residual-add and concat inputs so TensorRT can fuse the
   bottlenecks; target ~23 ms at 0.829 mIoU on the Jetson.
-- Harness: pinned host buffers + on-device argmax (uint8 mask out instead of
-  FP32 logits), ~2-3 ms off the Jetson numbers; the C++ wrapper gets the same.
+- Re-measure the desktop rows with the v2 harness so both columns of the
+  table share one methodology; give the C++ wrapper pinned buffers from day one.
 - Thinner decoder as the architecture experiment the profile points at.

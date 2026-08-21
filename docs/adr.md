@@ -388,12 +388,32 @@ because that trail deserved a narrative.
 
 ---
 
+## ADR-018: Pinned host buffers in the runner; keep the argmax export, don't sell it
+
+**Date:** 2026-08-22 · **Status:** accepted
+
+**Context.** The Jetson profile showed ~2.8 ms/frame of harness overhead over
+trtexec and a 16.8 MB logits tensor copied back every frame.
+
+**Decision.** Host buffers are pinned torch tensors, copies run async on a
+private stream. Measured: -2.5 ms on every engine, within 0.6 ms of trtexec;
+INT8-PTQ 20.4 ms, INT8-QAT crosses 30 fps. The on-device argmax export stays
+(a consumer wants the mask, and it matters over PCIe) but is documented as a
+wash at batch 1 on unified memory: the D2H saving is eaten by the reduction.
+
+**Consequences.** A wrapped-module export silently invalidated the INT8
+calibration cache (renamed tensors) and produced an FP16 engine labelled int8.
+Resolved by graph surgery that preserves names, a test that asserts it, and a
+per-precision layer histogram persisted with every engine - which also
+quantified the QAT problem at 48 FP16 layers. The desktop rows still use the
+v1 harness; they get re-measured on the next pod session so the table has one
+methodology.
+
+---
+
 ## Open decisions
 
-- **Harness transfers:** pinned host buffers and an argmax head so the output
-  is a 0.5 MB uint8 mask instead of 16.8 MB of logits. Measured cost today:
-  ~2.8 ms of 22.9 on the Jetson.
-- **QAT v2:** residual/concat quantizers (ADR-016).
+- **QAT v2:** residual/concat quantizers (ADR-016); 48 FP16 layers to remove.
 - **Decoder width:** the profile says the decoder, not the backbone, is the
   lever. A thinner dec0/dec1 is the next architecture experiment, with Jetson
   latency as the objective.
