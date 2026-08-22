@@ -33,6 +33,7 @@ try:
     import modelopt.torch.opt as mto
     import modelopt.torch.quantization as mtq
     from modelopt.torch.quantization.calib.histogram import HistogramCalibrator
+    from modelopt.torch.quantization.config import QuantizerAttributeConfig
     from modelopt.torch.quantization.model_calib import enable_stats_collection
     from modelopt.torch.quantization.nn import TensorQuantizer
 except ImportError as e:  # pragma: no cover
@@ -67,18 +68,22 @@ def _bottleneck_forward_quant(self: Bottleneck, x: torch.Tensor) -> torch.Tensor
     return self.relu(out)
 
 
-def add_residual_quantizers(model: nn.Module) -> int:
+def add_residual_quantizers(model: nn.Module, percentile_calib: bool = True) -> int:
     """Give every ResNet bottleneck a quantizer on its identity branch.
 
-    Must run *before* mtq.quantize / mto.restore. The attribute name ends in
-    `input_quantizer` on purpose: modelopt's quant_cfg rules match quantizers
-    by name, so `*input_quantizer` picks these up and gives them the same
-    8-bit histogram config as every conv input, no extra config needed.
+    Must run *after* mtq.quantize: if any TensorQuantizer already exists in
+    the model, mtq.quantize treats it as quantized and silently skips inserting
+    the conv input/weight quantizers (measured: a "QAT" run with 16 residual
+    quantizers and zero conv quantizers). Configured explicitly here, same
+    8-bit per-tensor histogram setup as the conv inputs.
     """
+    cfg = QuantizerAttributeConfig(
+        num_bits=8, axis=None, calibrator="histogram" if percentile_calib else "max"
+    )
     n = 0
     for m in model.modules():
         if isinstance(m, Bottleneck):
-            m.residual_input_quantizer = TensorQuantizer()
+            m.residual_input_quantizer = TensorQuantizer(cfg)
             m.forward = types.MethodType(_bottleneck_forward_quant, m)
             n += 1
     return n
@@ -107,8 +112,6 @@ def main() -> None:
     model = build_model(pretrained=False).to(device)
     state = torch.load(args.checkpoint, map_location="cpu")
     model.load_state_dict(state.get("model", state))
-    if not args.no_residual_quant:
-        print(f"residual quantizers added to {add_residual_quantizers(model)} bottlenecks")
 
     train_dl = DataLoader(
         CityscapesCategories(cfg["data_root"], "train", size_hw, augment=True),
@@ -147,6 +150,12 @@ def main() -> None:
     cfg["algorithm"] = None
 
     model = mtq.quantize(model, cfg, forward_loop=None)
+    if not args.no_residual_quant:
+        n = add_residual_quantizers(model)
+        print(f"residual quantizers added to {n} bottlenecks (after mtq.quantize)")
+    n_q = sum(isinstance(m, TensorQuantizer) for m in model.modules())
+    print(f"total quantizers: {n_q}")
+    assert n_q > 100, "conv quantizers missing: mtq.quantize did not convert the model"
     enable_stats_collection(model)
     model.eval()
     with torch.no_grad():
@@ -176,6 +185,7 @@ def main() -> None:
 
     # Plain FP32 fine-tuning (no AMP: keeps the fake-quant numerics simple).
     best = 0.0
+    best_state = copy.deepcopy(model.state_dict())
     global_step = 0
     for epoch in range(args.epochs):
         model.train()
@@ -204,18 +214,19 @@ def main() -> None:
         print(cm.summary(CATEGORY_NAMES))
         if miou > best:
             best = miou
-            # mto.save keeps the modelopt state alongside the weights, so the
-            # quantized model can be rebuilt exactly for export.
+            best_state = copy.deepcopy(model.state_dict())
+            # mto.save keeps the modelopt state alongside the weights.
             mto.save(model, out_dir / "best_qat.pth")
             print(f"  -> new best ({best:.4f}), saved {out_dir / 'best_qat.pth'}")
 
     # Export the best checkpoint with Q/DQ nodes (CPU, same recipe as
     # export/export_onnx.py: static shape, opset 17, TorchScript exporter).
     h, w = size_hw
-    fresh = build_model(pretrained=False)
-    if not args.no_residual_quant:
-        add_residual_quantizers(fresh)
-    export_model = mto.restore(fresh, out_dir / "best_qat.pth").eval()
+    # Export the trained model itself (best epoch weights reloaded). Not via
+    # mto.restore: a fresh model carrying the residual quantizers would make
+    # restore skip the conv quantizers, exactly like mtq.quantize above.
+    model.load_state_dict(best_state)
+    export_model = model.cpu().eval()
     onnx_path = out_dir / "model_qat.onnx"
     torch.onnx.export(
         export_model,
