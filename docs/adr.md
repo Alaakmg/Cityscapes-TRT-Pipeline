@@ -415,9 +415,11 @@ methodology.
 
 ## Open decisions
 
-- **QAT v2 on the Jetson:** the residual-quantized engine is built and
-  validated on the desktop (same accuracy, 13 fewer FP16 layers); the Jetson
-  build decides whether it reaches PTQ's latency. ModelOpt lesson folded into
+- **QAT v3 (BatchNorm folding before quantization):** v2 on the Jetson cut
+  FP16 layers 48 -> 18 but only 31.6 -> 29.6 ms; the profile shows BN nodes
+  between conv3 and the residual add still block TensorRT's conv+add+ReLU
+  fusion in the explicit-quant graph. Fold BN into the conv weights (exact)
+  before `mtq.quantize`, re-run the v2 recipe. ModelOpt lesson folded into
   ADR-012's list: any pre-existing quantizer makes quantize/restore a no-op.
 - **Decoder width:** the profile says the decoder, not the backbone, is
   what to shrink. A thinner dec0/dec1 is the next architecture experiment, with Jetson
