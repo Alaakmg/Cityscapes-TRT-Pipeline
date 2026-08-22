@@ -304,6 +304,24 @@ default, which fails at `createInferBuilder` with CUDA error 35 on a CUDA 12.8
 image (driver 570). `tensorrt-cu12==10.*` is the pin that matches the torch
 image; one more version trap for the list.
 
+**On the Jetson: 29.6 ms / 33.8 fps at 0.8287** (v1: 31.6 ms). The
+histogram moved exactly as designed - **FP16 layers 48 -> 18**, INT8 84 -> 102 -
+and the latency moved 2 ms. Still 129 layers against PTQ's 78, and trtexec
+compute-only says 27.8 vs 18.5 ms. The per-layer profile shows why: in the
+PTQ engine each bottleneck's `conv3 + BN + add + ReLU` is one INT8 kernel; in
+v2 `conv3` runs alone and the BN scale/shift + add + ReLU run as a separate
+FP16 pointwise kernel (~0.7 ms each, the `PWN(ElementWise...)` entries). The
+QAT ONNX still carries 63 `BatchNormalization` nodes: ModelOpt's `QuantConv2d`
+isn't a plain conv, so the exporter can't fold BN into it, and a BN between
+the conv and the add breaks TensorRT's explicit-quantization fusion pattern.
+Implicit PTQ never had the problem because TensorRT folds BN itself before
+picking precisions.
+
+So the residual quantizer was necessary but not sufficient. The missing step
+is the one NVIDIA's own QAT examples do first: **fold BatchNorm into the conv
+weights before quantization** (exact in eval mode), so the graph is
+`conv -> add -> ReLU` with Q/DQ where TensorRT expects it. That is QAT v3.
+
 All desktop rows were re-measured with the v2 harness in the same session:
 pinned buffers save ~0.5 ms (16%!) on the 5090 too - eager PyTorch to TRT FP16
 is now 3.8x - and the table finally has one methodology top to bottom.
@@ -330,9 +348,8 @@ is now 3.8x - and the table finally has one methodology top to bottom.
 
 ## Next
 
-- QAT v2 on the Jetson: build the v2 engine, count the FP16 layers, measure.
-- If the decoder's concat paths show up as the next FP16 cluster, quantize
-  those too.
+- QAT v3: fold BatchNorm into the convs before quantization, then the same
+  recipe as v2. Target: PTQ's ~20 ms at QAT's 0.829 on the Jetson.
 - Re-measure the desktop rows with the v2 harness so both columns of the
   table share one methodology; give the C++ wrapper pinned buffers from day one.
 - Thinner decoder as the architecture experiment the profile points at.

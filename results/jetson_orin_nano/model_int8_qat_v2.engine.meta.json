@@ -1,0 +1,15 @@
+{
+  "layer_precisions": {
+    "Half": 18,
+    "Int8": 102,
+    "Float": 9
+  },
+  "onnx": "/home/alaakmg/models/model_qat_v2.onnx",
+  "engine": "/home/alaakmg/results/model_int8_qat_v2.engine",
+  "fp16": false,
+  "int8": true,
+  "calib_images": 500,
+  "engine_mb": 45.2,
+  "build_seconds": 190.3,
+  "trt_version": "10.16.2.10"
+}
