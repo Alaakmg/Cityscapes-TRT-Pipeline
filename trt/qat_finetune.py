@@ -24,6 +24,7 @@ import types
 from pathlib import Path
 
 import torch
+import torch.nn.functional as F
 import yaml
 from torch import nn
 from torch.utils.data import DataLoader
@@ -49,7 +50,7 @@ from torchvision.models.resnet import Bottleneck
 from segdeploy.data import CityscapesCategories
 from segdeploy.labels import CATEGORY_NAMES
 from segdeploy.logging_utils import MetricsLogger
-from segdeploy.model import build_model, fold_batchnorm
+from segdeploy.model import DecoderBlock, build_model, fold_batchnorm
 from segdeploy.train import evaluate, set_seed
 
 
@@ -66,6 +67,32 @@ def _bottleneck_forward_quant(self: Bottleneck, x: torch.Tensor) -> torch.Tensor
     # 48 FP16 layers, encoder 2x slower than the PTQ engine).
     out = out + self.residual_input_quantizer(identity)
     return self.relu(out)
+
+
+def _decoder_forward_quant(self: DecoderBlock, x: torch.Tensor, skip: torch.Tensor | None) -> torch.Tensor:
+    # Quantize *before* the upsample so the encoder stage output that feeds
+    # this block has only quantized consumers (the next stage's conv input
+    # quantizers see the same tensor, the histogram calibration gives them
+    # the same scale), and TensorRT can keep that stage's fused conv3+add+relu
+    # output in INT8 instead of emitting FP16 for an unquantized concat.
+    x = F.interpolate(self.up_input_quantizer(x), scale_factor=2, mode="nearest")
+    if skip is not None:
+        x = torch.cat([x, self.skip_input_quantizer(skip)], dim=1)
+    x = self.conv1(x)
+    return self.conv2(x)
+
+
+def add_concat_quantizers(model: nn.Module) -> int:
+    """Quantize the decoder concat inputs (v4). Run after mtq.quantize, see above."""
+    cfg = QuantizerAttributeConfig(num_bits=8, axis=None, calibrator="histogram")
+    n = 0
+    for m in model.modules():
+        if isinstance(m, DecoderBlock):
+            m.up_input_quantizer = TensorQuantizer(cfg)
+            m.skip_input_quantizer = TensorQuantizer(cfg)
+            m.forward = types.MethodType(_decoder_forward_quant, m)
+            n += 1
+    return n
 
 
 def add_residual_quantizers(model: nn.Module, percentile_calib: bool = True) -> int:
@@ -106,6 +133,10 @@ def main() -> None:
         "--no-bn-fold", action="store_true",
         help="v1/v2 behaviour: keep BatchNorm nodes (blocks conv+add+relu fusion)",
     )
+    ap.add_argument(
+        "--no-concat-quant", action="store_true",
+        help="v1-v3 behaviour: leave the decoder concat inputs unquantized",
+    )
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text())
 
@@ -141,6 +172,7 @@ def main() -> None:
         lr=args.lr, calib_batches=args.calib_batches, percentile=args.percentile,
         quant="modelopt INT8, histogram/percentile activation calibration",
         residual_quant=not args.no_residual_quant, bn_fold=not args.no_bn_fold,
+        concat_quant=not args.no_concat_quant,
     )
 
     # INT8_DEFAULT_CFG calibrates activations with MaxCalibrator, and this
@@ -160,6 +192,8 @@ def main() -> None:
     if not args.no_residual_quant:
         n = add_residual_quantizers(model)
         print(f"residual quantizers added to {n} bottlenecks (after mtq.quantize)")
+    if not args.no_concat_quant:
+        print(f"concat quantizers added to {add_concat_quantizers(model)} decoder blocks")
     n_q = sum(isinstance(m, TensorQuantizer) for m in model.modules())
     print(f"total quantizers: {n_q}")
     assert n_q > 100, "conv quantizers missing: mtq.quantize did not convert the model"
@@ -176,10 +210,14 @@ def main() -> None:
         cal = getattr(m, "_calibrator", None)
         if cal is None:
             continue
-        if isinstance(cal, HistogramCalibrator):
-            m.load_calib_amax("percentile", percentile=args.percentile)
-        elif cal.compute_amax() is not None:
-            m.load_calib_amax()
+        try:
+            if isinstance(cal, HistogramCalibrator):
+                m.load_calib_amax("percentile", percentile=args.percentile)
+            elif cal.compute_amax() is not None:
+                m.load_calib_amax()
+        except RuntimeError:  # never saw a tensor (e.g. dec0 has no skip input)
+            m.disable()
+            continue
         m.enable_quant()
         m.disable_calib()
 
