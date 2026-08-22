@@ -1,0 +1,60 @@
+{"kind": "config", "wall_s": 0.0, "start_checkpoint": "/workspace/runs/fp32/best.pt", "epochs": 3, "lr": 1e-05, "calib_batches": 64, "percentile": 99.9, "quant": "modelopt INT8, histogram/percentile activation calibration", "residual_quant": true}
+{"kind": "calib_eval", "wall_s": 25.2, "miou": 0.81746}
+{"kind": "train_step", "wall_s": 31.16, "step": 20, "epoch": 0, "loss": 0.04684, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 41.99, "step": 40, "epoch": 0, "loss": 0.05176, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 49.33, "step": 60, "epoch": 0, "loss": 0.05716, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 54.12, "step": 80, "epoch": 0, "loss": 0.05121, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 59.83, "step": 100, "epoch": 0, "loss": 0.06026, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 64.63, "step": 120, "epoch": 0, "loss": 0.04836, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 69.43, "step": 140, "epoch": 0, "loss": 0.0579, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 74.25, "step": 160, "epoch": 0, "loss": 0.05176, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 79.04, "step": 180, "epoch": 0, "loss": 0.05751, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 83.84, "step": 200, "epoch": 0, "loss": 0.05836, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 88.65, "step": 220, "epoch": 0, "loss": 0.05095, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 93.46, "step": 240, "epoch": 0, "loss": 0.05512, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 98.29, "step": 260, "epoch": 0, "loss": 0.04474, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 103.12, "step": 280, "epoch": 0, "loss": 0.05565, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 107.97, "step": 300, "epoch": 0, "loss": 0.04898, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 112.8, "step": 320, "epoch": 0, "loss": 0.04987, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 117.67, "step": 340, "epoch": 0, "loss": 0.05248, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 122.51, "step": 360, "epoch": 0, "loss": 0.05406, "lr": 1e-05}
+{"kind": "val_epoch", "wall_s": 135.57, "epoch": 0, "step": 371, "miou": 0.82738, "pixel_acc": 0.93486, "iou_void": 0.70508, "iou_flat": 0.93492, "iou_construction": 0.87787, "iou_object": 0.60494, "iou_nature": 0.9033, "iou_sky": 0.92176, "iou_human": 0.76615, "iou_vehicle": 0.90498}
+{"kind": "train_step", "wall_s": 139.21, "step": 380, "epoch": 1, "loss": 0.05818, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 144.06, "step": 400, "epoch": 1, "loss": 0.05297, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 148.89, "step": 420, "epoch": 1, "loss": 0.05486, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 153.74, "step": 440, "epoch": 1, "loss": 0.0478, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 158.56, "step": 460, "epoch": 1, "loss": 0.04948, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 163.39, "step": 480, "epoch": 1, "loss": 0.05103, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 168.22, "step": 500, "epoch": 1, "loss": 0.05349, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 173.07, "step": 520, "epoch": 1, "loss": 0.0522, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 177.9, "step": 540, "epoch": 1, "loss": 0.04594, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 182.76, "step": 560, "epoch": 1, "loss": 0.04416, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 187.6, "step": 580, "epoch": 1, "loss": 0.03802, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 192.47, "step": 600, "epoch": 1, "loss": 0.04322, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 197.33, "step": 620, "epoch": 1, "loss": 0.05746, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 202.17, "step": 640, "epoch": 1, "loss": 0.04788, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 207.0, "step": 660, "epoch": 1, "loss": 0.03913, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 211.85, "step": 680, "epoch": 1, "loss": 0.04957, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 216.7, "step": 700, "epoch": 1, "loss": 0.04832, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 221.58, "step": 720, "epoch": 1, "loss": 0.05749, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 226.43, "step": 740, "epoch": 1, "loss": 0.04547, "lr": 1e-05}
+{"kind": "val_epoch", "wall_s": 237.46, "epoch": 1, "step": 742, "miou": 0.8286, "pixel_acc": 0.93525, "iou_void": 0.70603, "iou_flat": 0.9347, "iou_construction": 0.87873, "iou_object": 0.60798, "iou_nature": 0.90486, "iou_sky": 0.92174, "iou_human": 0.76857, "iou_vehicle": 0.90615}
+{"kind": "train_step", "wall_s": 243.51, "step": 760, "epoch": 2, "loss": 0.04614, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 248.35, "step": 780, "epoch": 2, "loss": 0.04268, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 253.2, "step": 800, "epoch": 2, "loss": 0.04538, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 258.05, "step": 820, "epoch": 2, "loss": 0.0487, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 262.88, "step": 840, "epoch": 2, "loss": 0.04831, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 267.76, "step": 860, "epoch": 2, "loss": 0.04404, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 272.63, "step": 880, "epoch": 2, "loss": 0.05528, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 277.47, "step": 900, "epoch": 2, "loss": 0.04642, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 282.28, "step": 920, "epoch": 2, "loss": 0.05, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 287.1, "step": 940, "epoch": 2, "loss": 0.04938, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 291.93, "step": 960, "epoch": 2, "loss": 0.05284, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 296.75, "step": 980, "epoch": 2, "loss": 0.05857, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 301.56, "step": 1000, "epoch": 2, "loss": 0.06245, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 306.4, "step": 1020, "epoch": 2, "loss": 0.04206, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 311.25, "step": 1040, "epoch": 2, "loss": 0.04957, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 316.07, "step": 1060, "epoch": 2, "loss": 0.05181, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 320.88, "step": 1080, "epoch": 2, "loss": 0.04922, "lr": 1e-05}
+{"kind": "train_step", "wall_s": 325.68, "step": 1100, "epoch": 2, "loss": 0.0372, "lr": 1e-05}
+{"kind": "val_epoch", "wall_s": 338.82, "epoch": 2, "step": 1113, "miou": 0.82877, "pixel_acc": 0.93516, "iou_void": 0.70501, "iou_flat": 0.93467, "iou_construction": 0.87804, "iou_object": 0.60774, "iou_nature": 0.90518, "iou_sky": 0.92471, "iou_human": 0.76856, "iou_vehicle": 0.90629}
