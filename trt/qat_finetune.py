@@ -49,7 +49,7 @@ from torchvision.models.resnet import Bottleneck
 from segdeploy.data import CityscapesCategories
 from segdeploy.labels import CATEGORY_NAMES
 from segdeploy.logging_utils import MetricsLogger
-from segdeploy.model import build_model
+from segdeploy.model import build_model, fold_batchnorm
 from segdeploy.train import evaluate, set_seed
 
 
@@ -102,6 +102,10 @@ def main() -> None:
         "--no-residual-quant", action="store_true",
         help="v1 behaviour: leave the residual adds unquantized (slower engine)",
     )
+    ap.add_argument(
+        "--no-bn-fold", action="store_true",
+        help="v1/v2 behaviour: keep BatchNorm nodes (blocks conv+add+relu fusion)",
+    )
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text())
 
@@ -112,6 +116,9 @@ def main() -> None:
     model = build_model(pretrained=False).to(device)
     state = torch.load(args.checkpoint, map_location="cpu")
     model.load_state_dict(state.get("model", state))
+    if not args.no_bn_fold:
+        print(f"batchnorm folded into {fold_batchnorm(model)} convs")
+        assert not any(isinstance(m, nn.BatchNorm2d) for m in model.modules())
 
     train_dl = DataLoader(
         CityscapesCategories(cfg["data_root"], "train", size_hw, augment=True),
@@ -133,7 +140,7 @@ def main() -> None:
         "config", start_checkpoint=args.checkpoint, epochs=args.epochs,
         lr=args.lr, calib_batches=args.calib_batches, percentile=args.percentile,
         quant="modelopt INT8, histogram/percentile activation calibration",
-        residual_quant=not args.no_residual_quant,
+        residual_quant=not args.no_residual_quant, bn_fold=not args.no_bn_fold,
     )
 
     # INT8_DEFAULT_CFG calibrates activations with MaxCalibrator, and this
