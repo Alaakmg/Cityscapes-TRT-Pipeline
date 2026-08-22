@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import types
 from pathlib import Path
 
 import torch
@@ -42,11 +43,45 @@ except ImportError as e:  # pragma: no cover
         "for QAT: pip install nvidia-modelopt huggingface_hub"
     ) from e
 
+from torchvision.models.resnet import Bottleneck
+
 from segdeploy.data import CityscapesCategories
 from segdeploy.labels import CATEGORY_NAMES
 from segdeploy.logging_utils import MetricsLogger
 from segdeploy.model import build_model
 from segdeploy.train import evaluate, set_seed
+
+
+def _bottleneck_forward_quant(self: Bottleneck, x: torch.Tensor) -> torch.Tensor:
+    identity = x
+    out = self.relu(self.bn1(self.conv1(x)))
+    out = self.relu(self.bn2(self.conv2(out)))
+    out = self.bn3(self.conv3(out))
+    if self.downsample is not None:
+        identity = self.downsample(x)
+    # Q/DQ on the residual branch: with both add inputs quantized TensorRT
+    # fuses conv3 + add + relu into a single INT8 kernel. Without it the add
+    # runs in FP16 as its own layer with re-quantization around it (measured:
+    # 48 FP16 layers, encoder 2x slower than the PTQ engine).
+    out = out + self.residual_input_quantizer(identity)
+    return self.relu(out)
+
+
+def add_residual_quantizers(model: nn.Module) -> int:
+    """Give every ResNet bottleneck a quantizer on its identity branch.
+
+    Must run *before* mtq.quantize / mto.restore. The attribute name ends in
+    `input_quantizer` on purpose: modelopt's quant_cfg rules match quantizers
+    by name, so `*input_quantizer` picks these up and gives them the same
+    8-bit histogram config as every conv input, no extra config needed.
+    """
+    n = 0
+    for m in model.modules():
+        if isinstance(m, Bottleneck):
+            m.residual_input_quantizer = TensorQuantizer()
+            m.forward = types.MethodType(_bottleneck_forward_quant, m)
+            n += 1
+    return n
 
 
 def main() -> None:
@@ -58,6 +93,10 @@ def main() -> None:
     ap.add_argument("--calib-batches", type=int, default=64)
     ap.add_argument("--percentile", type=float, default=99.9, help="Activation amax percentile")
     ap.add_argument("--out", default="runs/qat")
+    ap.add_argument(
+        "--no-residual-quant", action="store_true",
+        help="v1 behaviour: leave the residual adds unquantized (slower engine)",
+    )
     args = ap.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text())
 
@@ -68,6 +107,8 @@ def main() -> None:
     model = build_model(pretrained=False).to(device)
     state = torch.load(args.checkpoint, map_location="cpu")
     model.load_state_dict(state.get("model", state))
+    if not args.no_residual_quant:
+        print(f"residual quantizers added to {add_residual_quantizers(model)} bottlenecks")
 
     train_dl = DataLoader(
         CityscapesCategories(cfg["data_root"], "train", size_hw, augment=True),
@@ -89,6 +130,7 @@ def main() -> None:
         "config", start_checkpoint=args.checkpoint, epochs=args.epochs,
         lr=args.lr, calib_batches=args.calib_batches, percentile=args.percentile,
         quant="modelopt INT8, histogram/percentile activation calibration",
+        residual_quant=not args.no_residual_quant,
     )
 
     # INT8_DEFAULT_CFG calibrates activations with MaxCalibrator, and this
@@ -170,7 +212,10 @@ def main() -> None:
     # Export the best checkpoint with Q/DQ nodes (CPU, same recipe as
     # export/export_onnx.py: static shape, opset 17, TorchScript exporter).
     h, w = size_hw
-    export_model = mto.restore(build_model(pretrained=False), out_dir / "best_qat.pth").eval()
+    fresh = build_model(pretrained=False)
+    if not args.no_residual_quant:
+        add_residual_quantizers(fresh)
+    export_model = mto.restore(fresh, out_dir / "best_qat.pth").eval()
     onnx_path = out_dir / "model_qat.onnx"
     torch.onnx.export(
         export_model,
