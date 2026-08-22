@@ -29,27 +29,32 @@ Raw JSONs, tegrastats logs and `trtexec` layer profiles in `results/`.
 | TensorRT | INT8 (QAT v1) | RTX 5090 | 0.8290 | −0.0044 | 2.54 | 2.60 | 394 | 107 |
 | TensorRT | INT8 (QAT v2) | RTX 5090 | 0.8287 | −0.0047 | 2.50 | 2.51 | 400 | 107 |
 | TensorRT | INT8 (QAT v3) | RTX 5090 | 0.8267 | −0.0067 | 2.47 | 2.48 | 405 | 107 |
+| TensorRT | INT8 (QAT v4) | RTX 5090 | 0.8295 | −0.0039 | 3.10 | 3.11 | 323 | 46 |
 | TensorRT | FP32 | Jetson Orin Nano | 0.8334 | ±0.0000 | 108.8 | 109.1 | 9.2 | 176 |
 | TensorRT | FP16 | Jetson Orin Nano | 0.8334 | −0.0000 | 38.9 | 39.0 | 25.7 | 88 |
 | TensorRT | INT8 (PTQ) | Jetson Orin Nano | 0.8236 | −0.0098 | **20.4** | 20.5 | **49.0** | 45 |
 | TensorRT | INT8 (QAT v1) | Jetson Orin Nano | 0.8290 | −0.0044 | 31.8 | 31.8 | 31.5 | 45 |
 | TensorRT | INT8 (QAT v2) | Jetson Orin Nano | 0.8287 | −0.0047 | 29.6 | 29.6 | 33.8 | 45 |
 | TensorRT | INT8 (QAT v3) | Jetson Orin Nano | 0.8268 | −0.0066 | 26.4 | 26.5 | 37.9 | 45 |
+| TensorRT | **INT8 (QAT v4)** | Jetson Orin Nano | **0.8296** | −0.0038 | **19.9** | 20.1 | **50.2** | 45 |
 
 All rows: harness v2 (pinned host buffers, private CUDA stream), within ~0.5 ms of `trtexec`.
-The original v1-harness numbers stay in `results/` for reference. QAT v2 = residual
-branches quantized (Jetson FP16 layers 48 -> 18); QAT v3 = BatchNorm folded before
-quantization (FP16 layers -> 2, bottlenecks fuse). Remaining gap to PTQ: the unquantized
-decoder concat inputs force the last block of each encoder stage to emit FP16. See findings.
+The original v1-harness numbers stay in `results/` for reference.
+
+QAT went through four versions, each driven by a `trtexec` layer profile on the Jetson:
+v1 (plain Q/DQ, 48 FP16 layers), v2 (+ residual-branch quantizers, 18), v3 (+ BatchNorm
+folded before quantization, 2), v4 (+ decoder concat inputs quantized, 0). v4 is
+fully INT8, faster than PTQ and +0.6 mIoU over it on the Jetson: 19.9 ms, 50 fps,
+234 mJ/frame, 0.8296. The story is in [`docs/findings.md`](docs/findings.md).
 
 FP16 on the desktop: 3.8x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
 parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).
 
-Jetson: INT8-PTQ is 1.8x faster than FP16 and 2.4x more energy-efficient
-(268 vs 632 mJ/frame) for −1.0 mIoU point. The desktop table alone argues
-the other way; the Jetson is the device that ships. Details and the profiling
-breakdown in [`docs/findings.md`](docs/findings.md).
+Jetson: INT8 is 1.9x faster than FP16 and 2.7x more energy-efficient
+(QAT v4: 234 vs 632 mJ/frame) for −0.4 mIoU point. The desktop table alone
+argues the other way; the Jetson is the device that ships. Details and the
+profiling breakdown in [`docs/findings.md`](docs/findings.md).
 
 Power-mode sweep (all engines, 15 W / 25 W / MAXN_SUPER, clocks locked and DVFS):
 energy per frame is set by the precision, the power mode only moves latency.

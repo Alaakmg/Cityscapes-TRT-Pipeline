@@ -352,7 +352,7 @@ clearest argument for measuring on the deployment target.
 
 ## ADR-016: Diagnose the QAT engine's slowness instead of dropping the row
 
-**Date:** 2026-08-21 · **Status:** accepted, iterating (v2 residual Q/DQ, v3 BN folding: 31.6 -> 26.4 ms on the Jetson; v4 concat quantizers pending)
+**Date:** 2026-08-21 · **Status:** accepted, resolved 2026-08-22 (v2 residual Q/DQ, v3 BN folding, v4 concat quantizers: 31.6 -> 19.9 ms on the Jetson, faster than PTQ at +0.6 mIoU)
 
 **Context.** The QAT engine was slower than PTQ on both devices despite
 identical size and, on the Jetson, identical per-conv timings.
@@ -415,13 +415,9 @@ methodology.
 
 ## Open decisions
 
-- **QAT v4 (quantize the decoder concat inputs):** v3's BN folding made the
-  bottlenecks fuse (FP16 layers 18 -> 2, 29.6 -> 26.4 ms) but the last block
-  of each encoder stage still emits FP16 because its output also feeds an
-  unquantized decoder concat. Quantize both concat inputs per decoder block;
-  fine-tune the folded model at a lower lr (v3 diverged after epoch 1 at
-  1e-5). ModelOpt lesson folded into ADR-012's list: any pre-existing
-  quantizer makes quantize/restore a no-op.
+- **Decoder width:** with QAT resolved, the profile's remaining target is
+  the decoder (66% of time). ModelOpt lesson folded into ADR-012's list:
+  any pre-existing quantizer makes quantize/restore a no-op.
 - **Decoder width:** the profile says the decoder, not the backbone, is
   what to shrink. A thinner dec0/dec1 is the next architecture experiment, with Jetson
   latency as the objective.
