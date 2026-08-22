@@ -46,3 +46,27 @@ def test_tiny_overfit():
     assert loss.item() < min(0.1, first * 0.2), (
         f"loss did not collapse: {first:.3f} -> {loss.item():.3f}"
     )
+
+
+def test_fold_batchnorm_is_exact():
+    """Folding BN into convs must leave the (eval-mode) function unchanged."""
+    import numpy as np
+
+    from segdeploy.model import fold_batchnorm
+
+    torch.manual_seed(0)
+    model = build_model(pretrained=False).eval()
+    # give BN non-trivial statistics so folding actually has something to do
+    for m in model.modules():
+        if isinstance(m, torch.nn.BatchNorm2d):
+            m.running_mean.uniform_(-1, 1); m.running_var.uniform_(0.5, 2)
+            m.weight.data.uniform_(0.5, 1.5); m.bias.data.uniform_(-0.5, 0.5)
+    x = torch.randn(1, 3, 64, 128)
+    with torch.inference_mode():
+        ref = model(x)
+    n = fold_batchnorm(model)
+    with torch.inference_mode():
+        out = model(x)
+    assert n > 60
+    assert not any(isinstance(m, torch.nn.BatchNorm2d) for m in model.modules())
+    np.testing.assert_allclose(out.numpy(), ref.numpy(), rtol=1e-4, atol=1e-4)

@@ -14,7 +14,9 @@ from __future__ import annotations
 import torch
 import torch.nn.functional as F
 from torch import nn
+from torch.nn.utils.fusion import fuse_conv_bn_eval
 from torchvision.models import resnet50
+from torchvision.models.resnet import Bottleneck
 
 
 class ConvBNReLU(nn.Sequential):
@@ -79,3 +81,32 @@ class ResNet50UNet(nn.Module):
 
 def build_model(num_classes: int = 8, pretrained: bool = True) -> ResNet50UNet:
     return ResNet50UNet(num_classes=num_classes, pretrained=pretrained)
+
+
+def fold_batchnorm(model: nn.Module) -> int:
+    """Fold every BatchNorm2d into the conv that precedes it (exact in eval mode).
+
+    Must run on the plain model *before* mtq.quantize. ModelOpt's QuantConv2d
+    is not a plain conv, so torch's ONNX exporter can't fold BN into it; the
+    BN then sits between conv3 and the residual add in the exported graph and
+    breaks TensorRT's conv+add+ReLU INT8 fusion (measured on the Jetson: the
+    QAT v2 engine kept 129 layers vs PTQ's 78). Folding first gives TensorRT
+    the conv -> add -> ReLU pattern it expects.
+    """
+    model.eval()
+    n = 0
+    for m in model.modules():
+        if isinstance(m, Bottleneck):  # torchvision ResNet block
+            for c, b in (("conv1", "bn1"), ("conv2", "bn2"), ("conv3", "bn3")):
+                setattr(m, c, fuse_conv_bn_eval(getattr(m, c), getattr(m, b)))
+                setattr(m, b, nn.Identity())
+                n += 1
+        if isinstance(m, nn.Sequential):  # stem, downsample, decoder ConvBNReLU
+            names = list(m._modules)
+            for i in range(len(names) - 1):
+                a, b = m._modules[names[i]], m._modules[names[i + 1]]
+                if isinstance(a, nn.Conv2d) and isinstance(b, nn.BatchNorm2d):
+                    m._modules[names[i]] = fuse_conv_bn_eval(a, b)
+                    m._modules[names[i + 1]] = nn.Identity()
+                    n += 1
+    return n
