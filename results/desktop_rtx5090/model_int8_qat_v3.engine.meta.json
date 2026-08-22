@@ -1,0 +1,16 @@
+{
+  "layer_precisions": {
+    "?": 2,
+    "Float": 8,
+    "Int8": 114,
+    "Half": 17
+  },
+  "onnx": "/workspace/runs/qat_v3/model_qat.onnx",
+  "engine": "/workspace/results/model_int8_qat_v3.engine",
+  "fp16": false,
+  "int8": true,
+  "calib_images": 500,
+  "engine_mb": 106.79,
+  "build_seconds": 33.0,
+  "trt_version": "10.16.1.11"
+}
