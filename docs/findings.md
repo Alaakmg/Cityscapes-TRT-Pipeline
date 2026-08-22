@@ -350,6 +350,38 @@ Training note: with BN folded, the fine-tune **diverged after epoch 1** (0.8267
 v1/v2 fine-tunes stable; the best-epoch checkpoint logic saved the run, at
 0.2 pts below v2. v4 gets a lower learning rate.
 
+### QAT v4: quantize the concat inputs. Done.
+
+Quantizers on both inputs of every decoder concat (placed *before* the
+upsample so the encoder stage output has only quantized consumers; dec0's
+unused skip quantizer is disabled at calibration). Fine-tune at lr 3e-6,
+which keeps the BN-folded model stable (0.8295 epoch 1, 0.8289 epoch 2).
+
+| Jetson, MAXN_SUPER | layers | Int8 / Half / Float | trtexec compute | harness | fps | W | mJ/frame | mIoU |
+|---|---|---|---|---|---|---|---|---|
+| FP16 | 85 | 0 / 85 / 1 | 37.2 | 38.9 | 25.7 | 15.2 | 632 | 0.8334 |
+| INT8-PTQ | 78 | 77 / 0 / 1 | 18.7 | 20.4 | 49.0 | 11.7 | 261 | 0.8236 |
+| QAT v1 | 137 | 84 / 48 / 5 | 29.9 | 31.6 | 31.6 | 12.9 | 407 | 0.8290 |
+| QAT v2 (+residual Q/DQ) | 129 | 102 / 18 / 9 | 27.9 | 29.6 | 33.8 | 13.0 | 384 | 0.8287 |
+| QAT v3 (+BN folded) | 113 | 102 / 2 / 9 | 24.6 | 26.4 | 37.9 | 12.7 | 336 | 0.8268 |
+| **QAT v4 (+concat Q/DQ)** | **101** | **100 / 0 / 1** | **18.2** | **19.9** | **50.2** | **11.7** | **234** | **0.8296** |
+
+**v4 is faster than PTQ (18.2 vs 18.7 ms compute) and 0.6 mIoU points more
+accurate**, at the same 45 MB and power. Against FP16: 1.9x faster, 2.7x less
+energy per frame, for 0.4 mIoU points. That is the best point on the whole
+chart, and it took four engines to get there - each one a specific layer
+named by the profiler, each one measured on the target. Per-class at v4:
+object 0.607, human 0.769 (FP32: 0.616, 0.774) - the thin classes lost
+~1 point and nothing else moved.
+
+Why v4 beats PTQ rather than matching it: with every tensor explicitly
+quantized, TensorRT has no precision decisions left to make and no reformats
+to insert; PTQ's engine still carries a few FP32 boundary layers. On the
+5090 the same fully-INT8 graph is *slower* than v3 (3.10 vs 2.47 ms) - INT8
+resize and requantized concat kernels cost more than they save when
+bandwidth is free. The desktop and the Jetson disagree about INT8 one last
+time, and the Jetson is the one that ships.
+
 All desktop rows were re-measured with the v2 harness in the same session:
 pinned buffers save ~0.5 ms (16%!) on the 5090 too - eager PyTorch to TRT FP16
 is now 3.8x - and the table finally has one methodology top to bottom.
@@ -376,8 +408,7 @@ is now 3.8x - and the table finally has one methodology top to bottom.
 
 ## Next
 
-- QAT v4: quantize the decoder concat inputs so the encoder stage outputs
-  stay INT8; lower lr for the folded model. Target: PTQ's ~20 ms at ~0.829.
+- QAT is done. Next architecture lever is the decoder (66% of the time).
 - Re-measure the desktop rows with the v2 harness so both columns of the
   table share one methodology; give the C++ wrapper pinned buffers from day one.
 - Thinner decoder as the architecture experiment the profile points at.
