@@ -319,6 +319,34 @@ is the one NVIDIA's own QAT examples do first: fold BatchNorm into the conv
 weights before quantization (exact in eval mode), so the graph is
 `conv -> add -> ReLU` with Q/DQ where TensorRT expects it. That is QAT v3.
 
+### QAT v3: fold BatchNorm first
+
+`segdeploy.model.fold_batchnorm` folds all 63 BN layers into their convs on
+the plain model (exact; tested to 1e-4), then the v2 recipe runs on a
+BN-free graph. The exported ONNX has zero `BatchNormalization` nodes.
+
+| Jetson | layers | Int8 / Half / Float | trtexec compute | harness | mIoU |
+|---|---|---|---|---|---|
+| INT8-PTQ | 78 | 77 / 0 / 1 | 18.7 ms | 20.4 | 0.8236 |
+| QAT v1 | 137 | 84 / 48 / 5 | 29.9 | 31.6 | 0.8290 |
+| QAT v2 | 129 | 102 / 18 / 9 | 27.9 | 29.6 | 0.8287 |
+| QAT v3 | 113 | 102 / **2** / 9 | 24.6 | **26.4** | 0.8268 |
+
+The fusion now happens: `layer1.1/conv3 + Add + relu` is one INT8 kernel at
+0.274 ms, identical to PTQ's 0.273. FP16 layers are down to two. And yet 35
+layers and 6 ms remain, all in one place: the last block of every encoder
+stage. Its output feeds the next stage *and* a decoder skip connection, and
+the decoder's `concat` inputs were never quantized, so TensorRT has to emit
+that block's output in FP16: the fused kernel runs 3x slower (0.83 ms), plus
+a standalone DequantizeLinear (0.48 ms) and a reformat. Four stage boundaries
+x ~1.3 ms. Implicit PTQ quantizes the concat inputs on its own. That is v4:
+quantizers on the two concat inputs of each decoder block.
+
+Training note: with BN folded, the fine-tune **diverged after epoch 1** (0.8267
+-> 0.581 -> 0.496 at lr 1e-5). Folding removes the normalization that kept the
+v1/v2 fine-tunes stable; the best-epoch checkpoint logic saved the run, at
+0.2 pts below v2. v4 gets a lower learning rate.
+
 All desktop rows were re-measured with the v2 harness in the same session:
 pinned buffers save ~0.5 ms (16%!) on the 5090 too, putting eager PyTorch to
 TRT FP16 at 3.8x, and the table finally has one methodology top to bottom.
@@ -345,8 +373,8 @@ TRT FP16 at 3.8x, and the table finally has one methodology top to bottom.
 
 ## Next
 
-- QAT v3: fold BatchNorm into the convs before quantization, then the same
-  recipe as v2. Target: PTQ's ~20 ms at QAT's 0.829 on the Jetson.
+- QAT v4: quantize the decoder concat inputs so the encoder stage outputs
+  stay INT8; lower lr for the folded model. Target: PTQ's ~20 ms at ~0.829.
 - Re-measure the desktop rows with the v2 harness so both columns of the
   table share one methodology.
 - Thinner decoder as the architecture experiment the profile points at.

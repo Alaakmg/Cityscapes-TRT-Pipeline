@@ -28,16 +28,19 @@ Raw JSONs, tegrastats logs and `trtexec` layer profiles in `results/`.
 | TensorRT | INT8 (PTQ) | RTX 5090 | 0.8246 | −0.0088 | 2.39 | 2.50 | 419 | 46 |
 | TensorRT | INT8 (QAT v1) | RTX 5090 | 0.8290 | −0.0044 | 2.54 | 2.60 | 394 | 107 |
 | TensorRT | INT8 (QAT v2) | RTX 5090 | 0.8287 | −0.0047 | 2.50 | 2.51 | 400 | 107 |
+| TensorRT | INT8 (QAT v3) | RTX 5090 | 0.8267 | −0.0067 | 2.47 | 2.48 | 405 | 107 |
 | TensorRT | FP32 | Jetson Orin Nano | 0.8334 | ±0.0000 | 108.8 | 109.1 | 9.2 | 176 |
 | TensorRT | FP16 | Jetson Orin Nano | 0.8334 | −0.0000 | 38.9 | 39.0 | 25.7 | 88 |
 | TensorRT | INT8 (PTQ) | Jetson Orin Nano | 0.8236 | −0.0098 | **20.4** | 20.5 | **49.0** | 45 |
 | TensorRT | INT8 (QAT v1) | Jetson Orin Nano | 0.8290 | −0.0044 | 31.8 | 31.8 | 31.5 | 45 |
 | TensorRT | INT8 (QAT v2) | Jetson Orin Nano | 0.8287 | −0.0047 | 29.6 | 29.6 | 33.8 | 45 |
+| TensorRT | INT8 (QAT v3) | Jetson Orin Nano | 0.8268 | −0.0066 | 26.4 | 26.5 | 37.9 | 45 |
 
 All rows: harness v2 (pinned host buffers, private CUDA stream), within ~0.5 ms of `trtexec`.
 The original v1-harness numbers stay in `results/` for reference. QAT v2 = residual
-branches quantized (FP16 layers on the Jetson build: 48 -> 18); the remaining gap to PTQ
-is BatchNorm sitting between conv and add in the explicit-quant graph, see findings.
+branches quantized (Jetson FP16 layers 48 -> 18); QAT v3 = BatchNorm folded before
+quantization (FP16 layers -> 2, bottlenecks fuse). Remaining gap to PTQ: the unquantized
+decoder concat inputs force the last block of each encoder stage to emit FP16. See findings.
 
 FP16 on the desktop: 3.8x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
