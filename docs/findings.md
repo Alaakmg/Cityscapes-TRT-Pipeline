@@ -266,6 +266,48 @@ That histogram also put a number on the QAT problem:
 48 layers of the QAT engine run in FP16 - the unquantized residual paths and
 the re-quantization around them. That is the target for QAT v2.
 
+## QAT v2: quantizing the residual branch
+
+The fix for ADR-016: every ResNet bottleneck gets a quantizer on its identity
+path so both inputs of the residual add carry Q/DQ and TensorRT can fuse
+conv3 + add + ReLU into one INT8 kernel.
+
+It took two runs, because ModelOpt has a second silent skip I hadn't met yet.
+**If the model already contains any `TensorQuantizer`, both `mtq.quantize`
+and `mto.restore` treat it as quantized and insert nothing.** My first v2 run
+added the residual quantizers before `mtq.quantize`: it trained a model with
+16 quantizers and zero on the convs - an FP32 fine-tune that reported 0.8331
+mIoU and exported an ONNX with 16 Q/DQ pairs instead of 145. The engine
+histogram (`Half: 85, Int8: 0`) caught it, and the checkpoint's state dict
+confirmed it (0 conv amax entries). Order now: quantize, *then* add the
+residual quantizers with an explicit histogram config, assert the quantizer
+count, and export the trained model directly instead of restoring into a
+fresh one. Two guards that didn't exist yesterday made a plausible wrong
+result impossible to ship.
+
+The real run:
+
+| | pre-QAT calib | QAT best | engine mIoU | engine layers (5090) | 5090 ms |
+|---|---|---|---|---|---|
+| QAT v1 | 0.8186 | 0.8289 | 0.8290 | Int8 107 / Half 32 / Float 6 | 2.54 |
+| QAT v2 | 0.8175 | 0.8288 | 0.8287 | Int8 107 / **Half 19** / Float 11 | 2.50 |
+
+Accuracy unchanged (the residual quantizers cost nothing after fine-tuning),
+13 fewer FP16 layers on the desktop build, no desktop latency change - which
+is the expected non-result there. The remaining FP16 layers are the decoder
+concat/resize paths, which I left unquantized on purpose: the profile said
+the encoder was the problem. The Jetson build is the real test (v1 had 48
+FP16 layers there and 31.8 ms vs PTQ's 20.4).
+
+Also on this run: `pip install tensorrt` now resolves to the CUDA 13 build by
+default, which fails at `createInferBuilder` with CUDA error 35 on a CUDA 12.8
+image (driver 570). `tensorrt-cu12==10.*` is the pin that matches the torch
+image; one more version trap for the list.
+
+All desktop rows were re-measured with the v2 harness in the same session:
+pinned buffers save ~0.5 ms (16%!) on the 5090 too - eager PyTorch to TRT FP16
+is now 3.8x - and the table finally has one methodology top to bottom.
+
 ## Toolchain notes (the parts nobody's blog post mentions)
 
 - **TensorRT 11 removed `IInt8EntropyCalibrator2`** — implicit INT8
@@ -288,8 +330,9 @@ the re-quantization around them. That is the target for QAT v2.
 
 ## Next
 
-- QAT v2: quantize the residual-add and concat inputs so TensorRT can fuse the
-  bottlenecks; target ~23 ms at 0.829 mIoU on the Jetson.
+- QAT v2 on the Jetson: build the v2 engine, count the FP16 layers, measure.
+- If the decoder's concat paths show up as the next FP16 cluster, quantize
+  those too.
 - Re-measure the desktop rows with the v2 harness so both columns of the
   table share one methodology; give the C++ wrapper pinned buffers from day one.
 - Thinner decoder as the architecture experiment the profile points at.

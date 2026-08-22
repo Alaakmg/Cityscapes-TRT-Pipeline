@@ -350,7 +350,7 @@ clearest argument for measuring on the deployment target.
 
 ## ADR-016: Diagnose the QAT engine's slowness instead of dropping the row
 
-**Date:** 2026-08-21 · **Status:** accepted (fix pending)
+**Date:** 2026-08-21 · **Status:** accepted (fix implemented 2026-08-22, Jetson measurement pending)
 
 **Context.** The QAT engine was slower than PTQ on both devices despite
 identical size and, on the Jetson, identical per-conv timings.
@@ -413,7 +413,10 @@ methodology.
 
 ## Open decisions
 
-- **QAT v2:** residual/concat quantizers (ADR-016); 48 FP16 layers to remove.
+- **QAT v2 on the Jetson:** the residual-quantized engine is built and
+  validated on the desktop (same accuracy, 13 fewer FP16 layers); the Jetson
+  build decides whether it reaches PTQ's latency. ModelOpt lesson folded into
+  ADR-012's list: any pre-existing quantizer makes quantize/restore a no-op.
 - **Decoder width:** the profile says the decoder, not the backbone, is the
   lever. A thinner dec0/dec1 is the next architecture experiment, with Jetson
   latency as the objective.

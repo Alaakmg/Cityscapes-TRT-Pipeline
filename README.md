@@ -22,22 +22,23 @@ Raw JSONs, tegrastats logs and `trtexec` layer profiles in `results/`.
 
 | Variant | Precision | Device | mIoU | Δ vs FP32 | Latency mean (ms) | p95 (ms) | img/s | Size (MB) |
 |---|---|---|---|---|---|---|---|---|
-| PyTorch | FP32 | RTX 5090 | 0.8334 | – | 9.35 | 9.66 | 107 | 176 |
-| TensorRT | FP32 | RTX 5090 | 0.8334 | ±0.0000 | 6.17 | 6.19 | 162 | 251 |
-| TensorRT | FP16 | RTX 5090 | 0.8334 | −0.0000 | 2.96 | 2.97 | 338 | 89 |
-| TensorRT | INT8 (PTQ) | RTX 5090 | 0.8246 | −0.0088 | 2.94 | 2.96 | 340 | 46 |
-| TensorRT | INT8 (QAT) | RTX 5090 | 0.8290 | −0.0044 | 3.17 | 3.18 | 316 | 107 |
-| TensorRT | FP32 | Jetson Orin Nano | 0.8334 | ±0.0000 | 111.7 | 112.5 | 9.0 | 176 |
-| TensorRT | FP16 | Jetson Orin Nano | 0.8334 | −0.0000 | 41.6 | 42.4 | 24.1 | 88 |
-| TensorRT | INT8 (PTQ) | Jetson Orin Nano | 0.8236 | −0.0098 | **22.9** | 23.6 | **43.6** | 45 |
-| TensorRT | INT8 (QAT) | Jetson Orin Nano | 0.8290 | −0.0044 | 34.3 | 35.0 | 29.1 | 45 |
+| PyTorch | FP32 | RTX 5090 | 0.8334 | – | 9.41 | 9.54 | 106 | 176 |
+| TensorRT | FP32 | RTX 5090 | 0.8334 | ±0.0000 | 6.13 | 6.30 | 163 | 251 |
+| TensorRT | FP16 | RTX 5090 | 0.8334 | −0.0000 | 2.48 | 2.59 | 403 | 89 |
+| TensorRT | INT8 (PTQ) | RTX 5090 | 0.8246 | −0.0088 | 2.39 | 2.50 | 419 | 46 |
+| TensorRT | INT8 (QAT v1) | RTX 5090 | 0.8290 | −0.0044 | 2.54 | 2.60 | 394 | 107 |
+| TensorRT | INT8 (QAT v2) | RTX 5090 | 0.8287 | −0.0047 | 2.50 | 2.51 | 400 | 107 |
+| TensorRT | FP32 | Jetson Orin Nano | 0.8334 | ±0.0000 | 108.8 | 109.1 | 9.2 | 176 |
+| TensorRT | FP16 | Jetson Orin Nano | 0.8334 | −0.0000 | 38.9 | 39.0 | 25.7 | 88 |
+| TensorRT | INT8 (PTQ) | Jetson Orin Nano | 0.8236 | −0.0098 | **20.4** | 20.5 | **49.0** | 45 |
+| TensorRT | INT8 (QAT v1) | Jetson Orin Nano | 0.8290 | −0.0044 | 31.8 | 31.8 | 31.5 | 45 |
+| TensorRT | INT8 (QAT v2) | Jetson Orin Nano | – | – | – | – | – | – |
 
-Harness v2 (pinned host buffers, same engines, same clocks) takes ~2.5 ms off every
-Jetson row: FP16 38.9 ms, **INT8-PTQ 20.4 ms / 49 img/s**, INT8-QAT 31.8 ms / 31.5 img/s.
-The table above keeps the v1 numbers until the desktop rows are re-measured the same way.
-Details and the on-device-argmax non-result in [`docs/findings.md`](docs/findings.md).
+All rows: harness v2 (pinned host buffers, private CUDA stream), within ~0.5 ms of `trtexec`.
+The original v1-harness numbers stay in `results/` for reference. QAT v2 = residual
+branches quantized so TensorRT can fuse the ResNet bottlenecks; Jetson row pending.
 
-FP16 so far: **3.2x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss**
+FP16 on the desktop: **3.8x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss**
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
 parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).
 
@@ -58,8 +59,8 @@ INT8-PTQ is the only configuration above 30 fps at 25 W.
 | INT8-PTQ ms / fps / W / mJ per frame | 36.0 / 27.8 / 7.9 / 283 | 25.0 / 40.0 / 10.3 / 258 | 22.9 / 43.6 / 11.4 / 261 |
 | INT8 vs FP16 | 1.80x faster, 2.3x less energy | 1.77x, 2.3x | 1.81x, 2.4x |
 
-INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but **no
-latency win over FP16 at batch 1 on the 5090** — the workload isn't INT8-math-bound
+INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but **only a
+4% latency win over FP16 at batch 1 on the 5090** — the workload isn't INT8-math-bound
 there. The INT8 case rests on the bandwidth-starved Jetson, which is the point of
 measuring on the target. Degradation is spread across classes (construction/object/
 nature −1.4 to −1.6 pts), the QAT row exists to claw that back.
