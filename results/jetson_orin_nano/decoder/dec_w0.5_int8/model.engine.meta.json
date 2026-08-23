@@ -1,0 +1,15 @@
+{
+  "layer_precisions": {
+    "Int8": 75,
+    "Half": 5,
+    "Float": 1
+  },
+  "onnx": "/home/alaakmg/models/decoder/dec_w0.5.onnx",
+  "engine": "/home/alaakmg/results/decoder/dec_w0.5_int8/model.engine",
+  "fp16": false,
+  "int8": true,
+  "calib_images": 500,
+  "engine_mb": 33.64,
+  "build_seconds": 246.0,
+  "trt_version": "10.16.2.10"
+}

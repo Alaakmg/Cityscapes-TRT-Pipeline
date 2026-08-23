@@ -1,0 +1,15 @@
+{
+  "layer_precisions": {
+    "?": 2,
+    "Half": 69,
+    "Float": 1
+  },
+  "onnx": "/workspace/results/decoder/dec_w0.25_half/model.onnx",
+  "engine": "/workspace/results/decoder/dec_w0.25_half/model_fp16.engine",
+  "fp16": true,
+  "int8": false,
+  "calib_images": null,
+  "engine_mb": 57.23,
+  "build_seconds": 6.7,
+  "trt_version": "10.16.1.11"
+}

@@ -410,10 +410,37 @@ block to predict at 1/2 res with a bilinear x2 on the logits.
   the parameters of their full-res twins and are 14-19% faster; 0.5x width
   keeps 74% of the parameters and loses 24-36% of the latency.
 
-Accuracy is the other axis and costs a training run per point. Candidates
-chosen from the curve: 0.5/full (conservative), 0.25/full (same latency as
-0.5/half but keeps full-res prediction for the thin classes), 0.25/half (the
-aggressive end).
+Accuracy is the other axis; three variants got the full 60-epoch training
+(~$1.1 each), then FP16 and INT8-PTQ engines on the Jetson, per-variant
+calibration on train images:
+
+![decoder pareto](jetson_pareto_arch.png)
+
+| variant | FP16 ms / mIoU | INT8 ms / mIoU | INT8 fps | INT8 mJ/frame |
+|---|---|---|---|---|
+| 1.0/full (baseline) | 38.9 / 0.8334 | 20.4 / 0.8236 (QAT v4 19.9 / 0.8296) | 50 | 234-261 |
+| 0.5/full | 25.5 / 0.8312 | 15.7 / 0.8240 | 64 | 167 |
+| 0.25/full | 21.0 / 0.8256 | 12.9 / 0.8125 | 78 | 130 |
+| 0.25/half | 19.4 / 0.8279 | **11.3 / 0.8236** | **88** | **109** |
+
+What the curve says:
+
+- **Half the decoder width costs 0.2 mIoU points.** 0.5/full FP16 is 0.8312
+  vs the baseline's 0.8334, at 65% of the latency. The baseline decoder is
+  simply oversized for this task.
+- **0.25/half strictly dominates 0.25/full.** Faster *and* more accurate in
+  both precisions (INT8: 11.3 ms / 0.8236 vs 12.9 / 0.8125). At extreme
+  narrowness, spending the remaining channels at half resolution plus a
+  bilinear x2 on the logits beats a starved full-resolution block. I would
+  not have guessed that; the measurement did.
+- The headline: 0.25/half INT8 matches the baseline's INT8-PTQ accuracy
+  (0.8236 exactly) at 1.8x the speed and 2.4x less energy. 11.3 ms,
+  88 fps, 109 mJ/frame, 29 MB engine, on a $400 board at 10 W.
+- The INT8 Pareto frontier is 0.25/half -> 0.5/full -> QAT-v4 baseline ->
+  FP16 baseline. Everything else is dominated.
+- Obvious next step if this were a product: the QAT v4 recipe on 0.25/half
+  (would recover most of its PTQ loss at ~11 ms), and then the backbone,
+  which is now the floor (7 ms of the 11.3).
 
 ## Toolchain notes (the parts nobody's blog post mentions)
 
@@ -437,7 +464,7 @@ aggressive end).
 
 ## Next
 
-- Train the three decoder variants, put mIoU on the latency sweep, INT8 the winner.
+- QAT v4 recipe on 0.25/half; then the backbone is the remaining lever.
 - Re-measure the desktop rows with the v2 harness so both columns of the
   table share one methodology.
 - Thinner decoder as the architecture experiment the profile points at.

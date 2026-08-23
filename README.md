@@ -68,6 +68,14 @@ INT8-PTQ is the only configuration above 30 fps at 25 W.
 | INT8-PTQ ms / fps / W / mJ per frame | 36.0 / 27.8 / 7.9 / 283 | 25.0 / 40.0 / 10.3 / 258 | 22.9 / 43.6 / 11.4 / 261 |
 | INT8 vs FP16 | 1.80x faster, 2.3x less energy | 1.77x, 2.3x | 1.81x, 2.4x |
 
+Decoder-width experiment (hardware-aware architecture search, untrained latency
+probes first, then 60-epoch training for the 3 candidates): a 0.25-width decoder
+predicting at 1/2 resolution matches the baseline's INT8 accuracy at 1.8x the
+speed, at 11.3 ms / 88 fps / 109 mJ per frame on the Jetson. Full Pareto in
+[`docs/findings.md`](docs/findings.md).
+
+![decoder pareto](docs/jetson_pareto_arch.png)
+
 INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but only a
 4% latency win over FP16 at batch 1 on the 5090. The workload isn't INT8-math-bound
 there; the INT8 case rests on the bandwidth-starved Jetson. Degradation is spread

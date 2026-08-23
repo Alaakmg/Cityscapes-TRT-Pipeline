@@ -1,0 +1,14 @@
+{
+  "layer_precisions": {
+    "Half": 87,
+    "Float": 1
+  },
+  "onnx": "/home/alaakmg/models/decoder/dec_w0.25_half.onnx",
+  "engine": "/home/alaakmg/results/decoder/dec_w0.25_half_fp16/model.engine",
+  "fp16": true,
+  "int8": false,
+  "calib_images": null,
+  "engine_mb": 56.0,
+  "build_seconds": 106.0,
+  "trt_version": "10.16.2.10"
+}

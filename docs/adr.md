@@ -413,6 +413,33 @@ methodology.
 
 ---
 
+## ADR-019: Explore the decoder width on the target before training anything
+
+**Date:** 2026-08-24 · **Status:** accepted
+
+**Context.** The Jetson profile attributed 2/3 of FP16 latency to the decoder;
+the encoder is a fixed 7 ms INT8 floor. Training every candidate to measure it
+would cost a run each.
+
+**Decision.** Exploit that latency depends on architecture, not weights:
+export untrained variants, measure them on the Jetson (probes land within ~5%
+of trained engines), and train only the three points the latency curve made
+interesting. Two knobs: decoder width multiplier, and predicting at 1/2
+resolution with a bilinear x2 on the logits. Checkpoints carry their `arch`
+so every downstream tool rebuilds the right model.
+
+**Alternatives.** FLOPs or parameter proxies (both provably wrong here: the
+half-res variants have identical parameters and are 14-19% faster). Training
+all six (2x the cost for three dominated points).
+
+**Consequences.** ~$3.3 of training bought a real Pareto: half-width costs
+0.2 mIoU at 65% latency; 0.25/half strictly dominates 0.25/full (measured,
+not guessable); 0.25/half INT8 hits the baseline's PTQ accuracy at 1.8x its
+speed. The frontier below ~11 ms now runs through the backbone, which is a
+different experiment.
+
+---
+
 ## Open decisions
 
 - **Decoder width:** with QAT resolved, the profile's remaining target is
