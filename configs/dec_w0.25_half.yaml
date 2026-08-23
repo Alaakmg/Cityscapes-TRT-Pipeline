@@ -1,0 +1,14 @@
+# decoder variant: width x0.25, full_res=false (see docs/findings.md, decoder sweep)
+# FP32 baseline training config
+seed: 42
+data_root: /data/cityscapes     # official layout; registration required
+size_hw: [512, 1024]            # H, W, multiples of 32, fixed for the whole pipeline
+batch_size: 8
+workers: 4
+epochs: 60
+lr: 3.0e-4
+weight_decay: 1.0e-4
+warmup_iters: 500
+out_dir: runs/dec_w0.25_half
+decoder_width_mult: 0.25
+full_res: false
