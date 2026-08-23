@@ -6,7 +6,31 @@ targeting a Jetson Orin Nano.
 
 Follow-up to my earlier Cityscapes training projects (U-Net / U-Net3+ in Keras).
 This one is about everything that happens after training: export, quantization,
-benchmarking, profiling.
+benchmarking, profiling. Write-up: [docs/writeup.md](docs/writeup.md) ·
+decision log: [docs/adr.md](docs/adr.md) · findings: [docs/findings.md](docs/findings.md).
+
+## Headline numbers
+
+Every number is measured on the deployed TensorRT engine, on the device named:
+
+- Desktop (RTX 5090): FP16 gives 3.8x over eager PyTorch at 2.8x smaller,
+  with mIoU identical to four decimals. INT8 buys ~4% more. 2.4 ms / 419 img/s.
+- Jetson Orin Nano: INT8 is 1.9x faster than FP16 and takes 2.7x less energy
+  per frame. Nothing in the desktop table predicts this.
+- QAT beat PTQ on both axes, but it took four engine iterations, each driven
+  by a `trtexec` layer profile (residual Q/DQ, BatchNorm folding, concat
+  quantizers), to end fully INT8 at **19.9 ms / 50 fps / 0.8296 mIoU** vs
+  PTQ's 20.4 ms / 0.8236.
+- The productive architecture knob was the decoder, not the 44M-param
+  backbone: a 0.25-width decoder predicting at 1/2 resolution matches the
+  baseline's INT8 accuracy at 1.8x the speed.
+  **11.3 ms / 88 fps / 109 mJ per frame at 10 W.**
+
+![decoder pareto](docs/jetson_pareto_arch.png)
+
+Precision sets the energy per frame; the power mode only sets the frame rate:
+
+![jetson power modes](docs/jetson_power_modes.png)
 
 ## Results
 
@@ -60,8 +84,6 @@ Power-mode sweep (all engines, 15 W / 25 W / MAXN_SUPER, clocks locked and DVFS)
 energy per frame is set by the precision, the power mode only moves latency.
 INT8-PTQ is the only configuration above 30 fps at 25 W.
 
-![jetson power modes](docs/jetson_power_modes.png)
-
 | Jetson, clocks locked | 15 W | 25 W | MAXN_SUPER |
 |---|---|---|---|
 | FP16 ms / fps / W / mJ per frame | 64.9 / 15.4 / 9.9 / 645 | 44.2 / 22.6 / 13.7 / 606 | 41.5 / 24.1 / 15.0 / 621 |
@@ -73,8 +95,6 @@ probes first, then 60-epoch training for the 3 candidates): a 0.25-width decoder
 predicting at 1/2 resolution matches the baseline's INT8 accuracy at 1.8x the
 speed, at 11.3 ms / 88 fps / 109 mJ per frame on the Jetson. Full Pareto in
 [`docs/findings.md`](docs/findings.md).
-
-![decoder pareto](docs/jetson_pareto_arch.png)
 
 INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but only a
 4% latency win over FP16 at batch 1 on the 5090. The workload isn't INT8-math-bound
