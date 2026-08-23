@@ -1,0 +1,14 @@
+{
+  "layer_precisions": {
+    "Half": 202,
+    "Float": 1
+  },
+  "onnx": "/home/alaakmg/models/probes/w1.0_full.onnx",
+  "engine": "/home/alaakmg/results/arch/w1.0_full_fp16/model.engine",
+  "fp16": true,
+  "int8": false,
+  "calib_images": null,
+  "engine_mb": 88.46,
+  "build_seconds": 206.4,
+  "trt_version": "10.16.2.10"
+}

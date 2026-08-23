@@ -383,6 +383,38 @@ All desktop rows were re-measured with the v2 harness in the same session:
 pinned buffers save ~0.5 ms (16%!) on the 5090 too, putting eager PyTorch to
 TRT FP16 at 3.8x, and the table finally has one methodology top to bottom.
 
+## Decoder width: a hardware-aware sweep, latency first
+
+The profile said the decoder was 2/3 of the time. Latency depends on the
+architecture, not the weights, so I exported six *untrained* variants and
+measured them on the Jetson before training any of them (probe engines land
+within ~5% of the trained baseline's numbers, so the method holds). Two knobs:
+a width multiplier on the decoder channels, and dropping the full-resolution
+block to predict at 1/2 res with a bilinear x2 on the logits.
+
+| variant | FP16 ms | INT8 ms | encoder INT8 | decoder INT8 | params |
+|---|---|---|---|---|---|
+| width 1.0, full-res (baseline) | 40.8 | 21.2 | 6.9 | 11.7 | 43.9M |
+| width 0.5, full-res | 26.0 | 16.2 | 7.0 | 6.8 | 32.5M |
+| width 0.25, full-res | 21.5 | 13.7 | 7.0 | 4.3 | 27.7M |
+| width 1.0, half-res | 34.7 | 18.3 | 7.2 | 8.5 | 43.9M |
+| width 0.5, half-res | 23.4 | 13.7 | 7.0 | 4.2 | 32.5M |
+| width 0.25, half-res | 19.7 | **12.1** | 7.0 | 2.7 | 27.7M |
+
+- The ResNet50 encoder is a fixed floor: 7.0 ms INT8 in every variant. Below
+  ~12 ms the decoder is already smaller than the backbone and the next thing
+  to shrink is the backbone itself.
+- Width beats resolution: halving the width saves 4.9 ms INT8, dropping the
+  full-res block 2.9 ms. Both at 0.25: 43% faster than the baseline.
+- Parameter count predicts none of this. The half-res variants have exactly
+  the parameters of their full-res twins and are 14-19% faster; 0.5x width
+  keeps 74% of the parameters and loses 24-36% of the latency.
+
+Accuracy is the other axis and costs a training run per point. Candidates
+chosen from the curve: 0.5/full (conservative), 0.25/full (same latency as
+0.5/half but keeps full-res prediction for the thin classes), 0.25/half (the
+aggressive end).
+
 ## Toolchain notes (the parts nobody's blog post mentions)
 
 - **TensorRT 11 removed `IInt8EntropyCalibrator2`.** Implicit INT8
@@ -405,7 +437,7 @@ TRT FP16 at 3.8x, and the table finally has one methodology top to bottom.
 
 ## Next
 
-- QAT is done. Next architecture lever is the decoder (66% of the time).
+- Train the three decoder variants, put mIoU on the latency sweep, INT8 the winner.
 - Re-measure the desktop rows with the v2 harness so both columns of the
   table share one methodology.
 - Thinner decoder as the architecture experiment the profile points at.

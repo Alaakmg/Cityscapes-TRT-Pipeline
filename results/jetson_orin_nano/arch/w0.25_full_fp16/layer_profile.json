@@ -1,0 +1,192 @@
+[
+  { "count" : 166 }
+, { "name" : "onnx::Conv_798", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_792", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_786", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615_clone_1", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615_clone_2", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615_clone_3", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615_clone_4", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615_clone_5", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615_clone_6", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_615_clone_7", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_1", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_2", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_3", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_4", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_5", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_6", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_7", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_648_clone_8", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_750", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_750_clone_1", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_750_clone_2", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_1", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_2", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_3", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_4", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_5", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_6", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_7", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_8", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_654_clone_9", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_693", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_693_clone_1", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_693_clone_2", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_693_clone_3", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_693_clone_4", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_693_clone_5", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_1", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_2", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_3", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_4", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_5", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_6", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_7", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_8", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_9", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_10", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_11", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_12", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_13", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "onnx::Conv_624_clone_14", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "Reformatting CopyNode for Input Tensor 0 to /stem/stem.0/Conv + /stem/stem.2/Relu", "timeMs" : 27.3866, "averageMs" : 0.16498, "medianMs" : 0.165328, "percentage" : 0.838728 }
+, { "name" : "/stem/stem.0/Conv + /stem/stem.2/Relu", "timeMs" : 137.829, "averageMs" : 0.830295, "medianMs" : 0.830208, "percentage" : 4.22108 }
+, { "name" : "Identity_5", "timeMs" : 1.0144, "averageMs" : 0.00611084, "medianMs" : 0.006112, "percentage" : 0.0310665 }
+, { "name" : "Identity_6", "timeMs" : 0.915808, "averageMs" : 0.00551692, "medianMs" : 0.005472, "percentage" : 0.028047 }
+, { "name" : "Identity_7", "timeMs" : 0.830912, "averageMs" : 0.00500549, "medianMs" : 0.00496, "percentage" : 0.0254471 }
+, { "name" : "Identity_8", "timeMs" : 0.833728, "averageMs" : 0.00502246, "medianMs" : 0.00496, "percentage" : 0.0255333 }
+, { "name" : "Identity_9", "timeMs" : 0.815968, "averageMs" : 0.00491547, "medianMs" : 0.004928, "percentage" : 0.0249894 }
+, { "name" : "Identity_51", "timeMs" : 0.76288, "averageMs" : 0.00459566, "medianMs" : 0.00448, "percentage" : 0.0233635 }
+, { "name" : "Identity_52", "timeMs" : 0.762496, "averageMs" : 0.00459335, "medianMs" : 0.00448, "percentage" : 0.0233518 }
+, { "name" : "Identity_54", "timeMs" : 0.761248, "averageMs" : 0.00458583, "medianMs" : 0.00448, "percentage" : 0.0233136 }
+, { "name" : "Identity_55", "timeMs" : 0.8168, "averageMs" : 0.00492048, "medianMs" : 0.004928, "percentage" : 0.0250149 }
+, { "name" : "Identity_57", "timeMs" : 0.765536, "averageMs" : 0.00461166, "medianMs" : 0.004496, "percentage" : 0.0234449 }
+, { "name" : "Identity_58", "timeMs" : 0.765632, "averageMs" : 0.00461224, "medianMs" : 0.004512, "percentage" : 0.0234478 }
+, { "name" : "Identity_10", "timeMs" : 0.838816, "averageMs" : 0.00505311, "medianMs" : 0.004992, "percentage" : 0.0256891 }
+, { "name" : "Identity_11", "timeMs" : 0.813824, "averageMs" : 0.00490255, "medianMs" : 0.004928, "percentage" : 0.0249237 }
+, { "name" : "Identity_40", "timeMs" : 0.765984, "averageMs" : 0.00461436, "medianMs" : 0.00448, "percentage" : 0.0234586 }
+, { "name" : "Identity_41", "timeMs" : 0.76672, "averageMs" : 0.0046188, "medianMs" : 0.004512, "percentage" : 0.0234812 }
+, { "name" : "Identity_43", "timeMs" : 0.768064, "averageMs" : 0.00462689, "medianMs" : 0.004512, "percentage" : 0.0235223 }
+, { "name" : "Identity_44", "timeMs" : 0.816703, "averageMs" : 0.0049199, "medianMs" : 0.004928, "percentage" : 0.0250119 }
+, { "name" : "Identity_46", "timeMs" : 0.756544, "averageMs" : 0.00455749, "medianMs" : 0.00448, "percentage" : 0.0231695 }
+, { "name" : "Identity_47", "timeMs" : 0.758496, "averageMs" : 0.00456925, "medianMs" : 0.00448, "percentage" : 0.0232293 }
+, { "name" : "Identity_49", "timeMs" : 0.76192, "averageMs" : 0.00458988, "medianMs" : 0.00448, "percentage" : 0.0233341 }
+, { "name" : "Identity_12", "timeMs" : 1.00714, "averageMs" : 0.00606708, "medianMs" : 0.006048, "percentage" : 0.030844 }
+, { "name" : "Identity_15", "timeMs" : 0.88912, "averageMs" : 0.00535615, "medianMs" : 0.00544, "percentage" : 0.0272297 }
+, { "name" : "Identity_18", "timeMs" : 0.886048, "averageMs" : 0.00533764, "medianMs" : 0.00544, "percentage" : 0.0271356 }
+, { "name" : "Identity_13", "timeMs" : 0.865824, "averageMs" : 0.00521581, "medianMs" : 0.00512, "percentage" : 0.0265163 }
+, { "name" : "Identity_14", "timeMs" : 0.817024, "averageMs" : 0.00492183, "medianMs" : 0.004928, "percentage" : 0.0250217 }
+, { "name" : "Identity_16", "timeMs" : 0.768096, "averageMs" : 0.00462709, "medianMs" : 0.004512, "percentage" : 0.0235233 }
+, { "name" : "Identity_17", "timeMs" : 0.76656, "averageMs" : 0.00461783, "medianMs" : 0.004512, "percentage" : 0.0234763 }
+, { "name" : "Identity_19", "timeMs" : 0.766144, "averageMs" : 0.00461533, "medianMs" : 0.004512, "percentage" : 0.0234635 }
+, { "name" : "Identity_20", "timeMs" : 0.819392, "averageMs" : 0.00493609, "medianMs" : 0.004928, "percentage" : 0.0250942 }
+, { "name" : "Identity_39", "timeMs" : 0.76976, "averageMs" : 0.00463711, "medianMs" : 0.004512, "percentage" : 0.0235743 }
+, { "name" : "Identity_42", "timeMs" : 0.768896, "averageMs" : 0.0046319, "medianMs" : 0.004512, "percentage" : 0.0235478 }
+, { "name" : "Identity_45", "timeMs" : 0.766528, "averageMs" : 0.00461764, "medianMs" : 0.004512, "percentage" : 0.0234753 }
+, { "name" : "Identity_48", "timeMs" : 0.821632, "averageMs" : 0.00494959, "medianMs" : 0.00496, "percentage" : 0.0251628 }
+, { "name" : "Identity_21", "timeMs" : 0.967744, "averageMs" : 0.00582978, "medianMs" : 0.00592, "percentage" : 0.0296376 }
+, { "name" : "Identity_24", "timeMs" : 0.88944, "averageMs" : 0.00535807, "medianMs" : 0.00544, "percentage" : 0.0272395 }
+, { "name" : "Identity_27", "timeMs" : 0.888768, "averageMs" : 0.00535402, "medianMs" : 0.00544, "percentage" : 0.0272189 }
+, { "name" : "Identity_30", "timeMs" : 0.91328, "averageMs" : 0.00550169, "medianMs" : 0.005504, "percentage" : 0.0279696 }
+, { "name" : "Identity_33", "timeMs" : 0.895776, "averageMs" : 0.00539624, "medianMs" : 0.00544, "percentage" : 0.0274336 }
+, { "name" : "Identity_36", "timeMs" : 0.884288, "averageMs" : 0.00532704, "medianMs" : 0.005408, "percentage" : 0.0270817 }
+, { "name" : "Identity_22", "timeMs" : 0.876512, "averageMs" : 0.00528019, "medianMs" : 0.005344, "percentage" : 0.0268436 }
+, { "name" : "Identity_23", "timeMs" : 0.824864, "averageMs" : 0.00496906, "medianMs" : 0.004992, "percentage" : 0.0252618 }
+, { "name" : "Identity_25", "timeMs" : 0.76592, "averageMs" : 0.00461398, "medianMs" : 0.004512, "percentage" : 0.0234567 }
+, { "name" : "Identity_26", "timeMs" : 0.771936, "averageMs" : 0.00465022, "medianMs" : 0.004512, "percentage" : 0.0236409 }
+, { "name" : "Identity_28", "timeMs" : 0.764288, "averageMs" : 0.00460414, "medianMs" : 0.004512, "percentage" : 0.0234067 }
+, { "name" : "Identity_29", "timeMs" : 0.822176, "averageMs" : 0.00495287, "medianMs" : 0.00496, "percentage" : 0.0251795 }
+, { "name" : "Identity_31", "timeMs" : 0.771232, "averageMs" : 0.00464598, "medianMs" : 0.004544, "percentage" : 0.0236193 }
+, { "name" : "Identity_32", "timeMs" : 0.769376, "averageMs" : 0.0046348, "medianMs" : 0.004544, "percentage" : 0.0235625 }
+, { "name" : "Identity_34", "timeMs" : 0.774304, "averageMs" : 0.00466448, "medianMs" : 0.004592, "percentage" : 0.0237134 }
+, { "name" : "Identity_35", "timeMs" : 0.823328, "averageMs" : 0.00495981, "medianMs" : 0.00496, "percentage" : 0.0252148 }
+, { "name" : "Identity_37", "timeMs" : 0.768832, "averageMs" : 0.00463152, "medianMs" : 0.004528, "percentage" : 0.0235458 }
+, { "name" : "Identity_38", "timeMs" : 0.76912, "averageMs" : 0.00463325, "medianMs" : 0.004544, "percentage" : 0.0235547 }
+, { "name" : "Identity_50", "timeMs" : 0.76688, "averageMs" : 0.00461976, "medianMs" : 0.004528, "percentage" : 0.0234861 }
+, { "name" : "Identity_53", "timeMs" : 0.818752, "averageMs" : 0.00493224, "medianMs" : 0.00496, "percentage" : 0.0250746 }
+, { "name" : "Identity_56", "timeMs" : 0.770784, "averageMs" : 0.00464328, "medianMs" : 0.004544, "percentage" : 0.0236056 }
+, { "name" : "/pool/MaxPool", "timeMs" : 39.1269, "averageMs" : 0.235704, "medianMs" : 0.235712, "percentage" : 1.19828 }
+, { "name" : "/layer1/layer1.0/conv1/Conv + /layer1/layer1.0/relu/Relu", "timeMs" : 16.7346, "averageMs" : 0.100811, "medianMs" : 0.100848, "percentage" : 0.512504 }
+, { "name" : "/layer1/layer1.0/conv2/Conv + /layer1/layer1.0/relu_1/Relu", "timeMs" : 43.8412, "averageMs" : 0.264104, "medianMs" : 0.263968, "percentage" : 1.34266 }
+, { "name" : "/layer1/layer1.0/conv3/Conv", "timeMs" : 43.8617, "averageMs" : 0.264227, "medianMs" : 0.264208, "percentage" : 1.34328 }
+, { "name" : "/layer1/layer1.0/downsample/downsample.0/Conv + /layer1/layer1.0/Add + /layer1/layer1.0/relu_2/Relu", "timeMs" : 69.2087, "averageMs" : 0.41692, "medianMs" : 0.4168, "percentage" : 2.11955 }
+, { "name" : "/layer1/layer1.1/conv1/Conv + /layer1/layer1.1/relu/Relu", "timeMs" : 38.3591, "averageMs" : 0.231079, "medianMs" : 0.231056, "percentage" : 1.17476 }
+, { "name" : "/layer1/layer1.1/conv2/Conv + /layer1/layer1.1/relu_1/Relu", "timeMs" : 43.415, "averageMs" : 0.261536, "medianMs" : 0.261616, "percentage" : 1.3296 }
+, { "name" : "/layer1/layer1.1/conv3/Conv + /layer1/layer1.1/Add + /layer1/layer1.1/relu_2/Relu", "timeMs" : 68.8401, "averageMs" : 0.414699, "medianMs" : 0.414464, "percentage" : 2.10826 }
+, { "name" : "/layer1/layer1.2/conv1/Conv + /layer1/layer1.2/relu/Relu", "timeMs" : 38.5394, "averageMs" : 0.232165, "medianMs" : 0.232176, "percentage" : 1.18029 }
+, { "name" : "/layer1/layer1.2/conv2/Conv + /layer1/layer1.2/relu_1/Relu", "timeMs" : 43.3132, "averageMs" : 0.260923, "medianMs" : 0.260864, "percentage" : 1.32649 }
+, { "name" : "/layer1/layer1.2/conv3/Conv + /layer1/layer1.2/Add + /layer1/layer1.2/relu_2/Relu", "timeMs" : 68.7558, "averageMs" : 0.414192, "medianMs" : 0.413904, "percentage" : 2.10568 }
+, { "name" : "/layer2/layer2.0/conv1/Conv + /layer2/layer2.0/relu/Relu", "timeMs" : 49.3926, "averageMs" : 0.297546, "medianMs" : 0.297504, "percentage" : 1.51267 }
+, { "name" : "/layer2/layer2.0/downsample/downsample.0/Conv", "timeMs" : 40.0924, "averageMs" : 0.24152, "medianMs" : 0.241488, "percentage" : 1.22785 }
+, { "name" : "/layer2/layer2.0/conv2/Conv + /layer2/layer2.0/relu_1/Relu", "timeMs" : 36.2426, "averageMs" : 0.218329, "medianMs" : 0.218208, "percentage" : 1.10995 }
+, { "name" : "/layer2/layer2.0/conv3/Conv + /layer2/layer2.0/Add + /layer2/layer2.0/relu_2/Relu", "timeMs" : 41.0954, "averageMs" : 0.247563, "medianMs" : 0.244592, "percentage" : 1.25857 }
+, { "name" : "/layer2/layer2.1/conv1/Conv + /layer2/layer2.1/relu/Relu", "timeMs" : 23.8358, "averageMs" : 0.143589, "medianMs" : 0.141984, "percentage" : 0.729983 }
+, { "name" : "/layer2/layer2.1/conv2/Conv + /layer2/layer2.1/relu_1/Relu", "timeMs" : 32.7271, "averageMs" : 0.197151, "medianMs" : 0.191488, "percentage" : 1.00228 }
+, { "name" : "/layer2/layer2.1/conv3/Conv + /layer2/layer2.1/Add + /layer2/layer2.1/relu_2/Relu", "timeMs" : 41.3528, "averageMs" : 0.249113, "medianMs" : 0.248912, "percentage" : 1.26645 }
+, { "name" : "/layer2/layer2.2/conv1/Conv + /layer2/layer2.2/relu/Relu", "timeMs" : 23.6426, "averageMs" : 0.142425, "medianMs" : 0.142368, "percentage" : 0.724066 }
+, { "name" : "/layer2/layer2.2/conv2/Conv + /layer2/layer2.2/relu_1/Relu", "timeMs" : 31.7049, "averageMs" : 0.190993, "medianMs" : 0.190976, "percentage" : 0.970977 }
+, { "name" : "/layer2/layer2.2/conv3/Conv + /layer2/layer2.2/Add + /layer2/layer2.2/relu_2/Relu", "timeMs" : 41.27, "averageMs" : 0.248614, "medianMs" : 0.248592, "percentage" : 1.26391 }
+, { "name" : "/layer2/layer2.3/conv1/Conv + /layer2/layer2.3/relu/Relu", "timeMs" : 23.577, "averageMs" : 0.14203, "medianMs" : 0.141968, "percentage" : 0.722057 }
+, { "name" : "/layer2/layer2.3/conv2/Conv + /layer2/layer2.3/relu_1/Relu", "timeMs" : 31.7359, "averageMs" : 0.19118, "medianMs" : 0.1912, "percentage" : 0.971927 }
+, { "name" : "/layer2/layer2.3/conv3/Conv + /layer2/layer2.3/Add + /layer2/layer2.3/relu_2/Relu", "timeMs" : 41.4741, "averageMs" : 0.249844, "medianMs" : 0.249776, "percentage" : 1.27016 }
+, { "name" : "/layer3/layer3.0/conv1/Conv + /layer3/layer3.0/relu/Relu", "timeMs" : 35.5413, "averageMs" : 0.214104, "medianMs" : 0.214176, "percentage" : 1.08847 }
+, { "name" : "/layer3/layer3.0/downsample/downsample.0/Conv", "timeMs" : 33.9977, "averageMs" : 0.204806, "medianMs" : 0.204112, "percentage" : 1.0412 }
+, { "name" : "/layer3/layer3.0/conv2/Conv + /layer3/layer3.0/relu_1/Relu", "timeMs" : 32.5371, "averageMs" : 0.196007, "medianMs" : 0.195152, "percentage" : 0.996465 }
+, { "name" : "/layer3/layer3.0/conv3/Conv + /layer3/layer3.0/Add + /layer3/layer3.0/relu_2/Relu", "timeMs" : 27.3858, "averageMs" : 0.164974, "medianMs" : 0.16416, "percentage" : 0.838701 }
+, { "name" : "/layer3/layer3.1/conv1/Conv + /layer3/layer3.1/relu/Relu", "timeMs" : 18.1258, "averageMs" : 0.109191, "medianMs" : 0.1084, "percentage" : 0.55511 }
+, { "name" : "/layer3/layer3.1/conv2/Conv + /layer3/layer3.1/relu_1/Relu", "timeMs" : 29.5246, "averageMs" : 0.177859, "medianMs" : 0.176864, "percentage" : 0.904206 }
+, { "name" : "/layer3/layer3.1/conv3/Conv + /layer3/layer3.1/Add + /layer3/layer3.1/relu_2/Relu", "timeMs" : 27.7089, "averageMs" : 0.166921, "medianMs" : 0.166608, "percentage" : 0.848598 }
+, { "name" : "/layer3/layer3.2/conv1/Conv + /layer3/layer3.2/relu/Relu", "timeMs" : 18.0551, "averageMs" : 0.108765, "medianMs" : 0.108, "percentage" : 0.552945 }
+, { "name" : "/layer3/layer3.2/conv2/Conv + /layer3/layer3.2/relu_1/Relu", "timeMs" : 29.0796, "averageMs" : 0.175178, "medianMs" : 0.1752, "percentage" : 0.890575 }
+, { "name" : "/layer3/layer3.2/conv3/Conv + /layer3/layer3.2/Add + /layer3/layer3.2/relu_2/Relu", "timeMs" : 27.593, "averageMs" : 0.166223, "medianMs" : 0.166192, "percentage" : 0.845048 }
+, { "name" : "/layer3/layer3.3/conv1/Conv + /layer3/layer3.3/relu/Relu", "timeMs" : 18.2138, "averageMs" : 0.109722, "medianMs" : 0.108784, "percentage" : 0.557806 }
+, { "name" : "/layer3/layer3.3/conv2/Conv + /layer3/layer3.3/relu_1/Relu", "timeMs" : 29.3196, "averageMs" : 0.176624, "medianMs" : 0.17664, "percentage" : 0.897926 }
+, { "name" : "/layer3/layer3.3/conv3/Conv + /layer3/layer3.3/Add + /layer3/layer3.3/relu_2/Relu", "timeMs" : 27.2033, "averageMs" : 0.163875, "medianMs" : 0.163792, "percentage" : 0.833115 }
+, { "name" : "/layer3/layer3.4/conv1/Conv + /layer3/layer3.4/relu/Relu", "timeMs" : 17.9874, "averageMs" : 0.108358, "medianMs" : 0.108096, "percentage" : 0.550872 }
+, { "name" : "/layer3/layer3.4/conv2/Conv + /layer3/layer3.4/relu_1/Relu", "timeMs" : 29.2043, "averageMs" : 0.175929, "medianMs" : 0.175856, "percentage" : 0.894394 }
+, { "name" : "/layer3/layer3.4/conv3/Conv + /layer3/layer3.4/Add + /layer3/layer3.4/relu_2/Relu", "timeMs" : 27.3334, "averageMs" : 0.164659, "medianMs" : 0.16464, "percentage" : 0.837097 }
+, { "name" : "/layer3/layer3.5/conv1/Conv + /layer3/layer3.5/relu/Relu", "timeMs" : 18.0215, "averageMs" : 0.108563, "medianMs" : 0.10784, "percentage" : 0.551917 }
+, { "name" : "/layer3/layer3.5/conv2/Conv + /layer3/layer3.5/relu_1/Relu", "timeMs" : 29.31, "averageMs" : 0.176566, "medianMs" : 0.176608, "percentage" : 0.897632 }
+, { "name" : "/layer3/layer3.5/conv3/Conv + /layer3/layer3.5/Add + /layer3/layer3.5/relu_2/Relu", "timeMs" : 26.8895, "averageMs" : 0.161985, "medianMs" : 0.161792, "percentage" : 0.823502 }
+, { "name" : "/layer4/layer4.0/conv1/Conv + /layer4/layer4.0/relu/Relu", "timeMs" : 31.3235, "averageMs" : 0.188696, "medianMs" : 0.188672, "percentage" : 0.959298 }
+, { "name" : "/layer4/layer4.0/downsample/downsample.0/Conv", "timeMs" : 33.1498, "averageMs" : 0.199698, "medianMs" : 0.199456, "percentage" : 1.01523 }
+, { "name" : "/layer4/layer4.0/conv2/Conv + /layer4/layer4.0/relu_1/Relu", "timeMs" : 31.8258, "averageMs" : 0.191721, "medianMs" : 0.190768, "percentage" : 0.974678 }
+, { "name" : "/layer4/layer4.0/conv3/Conv + /layer4/layer4.0/Add + /layer4/layer4.0/relu_2/Relu", "timeMs" : 20.7599, "averageMs" : 0.12506, "medianMs" : 0.123696, "percentage" : 0.635783 }
+, { "name" : "/layer4/layer4.1/conv1/Conv + /layer4/layer4.1/relu/Relu", "timeMs" : 16.8727, "averageMs" : 0.101643, "medianMs" : 0.099792, "percentage" : 0.516733 }
+, { "name" : "/layer4/layer4.1/conv2/Conv + /layer4/layer4.1/relu_1/Relu", "timeMs" : 30.3094, "averageMs" : 0.182587, "medianMs" : 0.1704, "percentage" : 0.928239 }
+, { "name" : "/layer4/layer4.1/conv3/Conv + /layer4/layer4.1/Add + /layer4/layer4.1/relu_2/Relu", "timeMs" : 23.2449, "averageMs" : 0.14003, "medianMs" : 0.134208, "percentage" : 0.711887 }
+, { "name" : "/layer4/layer4.2/conv1/Conv + /layer4/layer4.2/relu/Relu", "timeMs" : 15.8929, "averageMs" : 0.0957401, "medianMs" : 0.091312, "percentage" : 0.486726 }
+, { "name" : "/layer4/layer4.2/conv2/Conv + /layer4/layer4.2/relu_1/Relu", "timeMs" : 28.3102, "averageMs" : 0.170544, "medianMs" : 0.170272, "percentage" : 0.867014 }
+, { "name" : "/layer4/layer4.2/conv3/Conv + /layer4/layer4.2/Add + /layer4/layer4.2/relu_2/Relu", "timeMs" : 22.5095, "averageMs" : 0.135599, "medianMs" : 0.13552, "percentage" : 0.689364 }
+, { "name" : "/dec4/Resize", "timeMs" : 20.5852, "averageMs" : 0.124007, "medianMs" : 0.124, "percentage" : 0.630432 }
+, { "name" : "/dec4/Resize_output_0 copy", "timeMs" : 37.4042, "averageMs" : 0.225326, "medianMs" : 0.225312, "percentage" : 1.14552 }
+, { "name" : "/layer3/layer3.5/relu_2/Relu_output_0 copy", "timeMs" : 19.1382, "averageMs" : 0.115291, "medianMs" : 0.115264, "percentage" : 0.586118 }
+, { "name" : "Reformatting CopyNode for Input Tensor 0 to /dec4/conv1/conv1.0/Conv + /dec4/conv1/conv1.2/Relu", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "/dec4/conv1/conv1.0/Conv + /dec4/conv1/conv1.2/Relu", "timeMs" : 193.079, "averageMs" : 1.16312, "medianMs" : 1.16426, "percentage" : 5.91312 }
+, { "name" : "/dec4/conv2/conv2.0/Conv + /dec4/conv2/conv2.2/Relu", "timeMs" : 9.18512, "averageMs" : 0.055332, "medianMs" : 0.055328, "percentage" : 0.281299 }
+, { "name" : "/dec3/Resize", "timeMs" : 4.84886, "averageMs" : 0.02921, "medianMs" : 0.029184, "percentage" : 0.148499 }
+, { "name" : "/dec3/Resize_output_0 copy", "timeMs" : 10.2061, "averageMs" : 0.0614824, "medianMs" : 0.06144, "percentage" : 0.312566 }
+, { "name" : "/layer2/layer2.3/relu_2/Relu_output_0 copy", "timeMs" : 36.709, "averageMs" : 0.221139, "medianMs" : 0.221056, "percentage" : 1.12423 }
+, { "name" : "Reformatting CopyNode for Input Tensor 0 to /dec3/conv1/conv1.0/Conv + /dec3/conv1/conv1.2/Relu", "timeMs" : 0, "averageMs" : 0, "medianMs" : 0, "percentage" : 0 }
+, { "name" : "/dec3/conv1/conv1.0/Conv + /dec3/conv1/conv1.2/Relu", "timeMs" : 86.9434, "averageMs" : 0.523756, "medianMs" : 0.523712, "percentage" : 2.66268 }
+, { "name" : "/dec3/conv2/conv2.0/Conv + /dec3/conv2/conv2.2/Relu", "timeMs" : 12.4928, "averageMs" : 0.0752576, "medianMs" : 0.075248, "percentage" : 0.382597 }
+, { "name" : "/dec2/Resize", "timeMs" : 9.6384, "averageMs" : 0.0580626, "medianMs" : 0.057984, "percentage" : 0.29518 }
+, { "name" : "/dec2/Resize_output_0 copy", "timeMs" : 19.1229, "averageMs" : 0.115198, "medianMs" : 0.115232, "percentage" : 0.585647 }
+, { "name" : "/layer1/layer1.2/relu_2/Relu_output_0 copy", "timeMs" : 72.4034, "averageMs" : 0.436165, "medianMs" : 0.436064, "percentage" : 2.21739 }
+, { "name" : "/dec2/conv1/conv1.0/Conv + /dec2/conv1/conv1.2/Relu", "timeMs" : 154.209, "averageMs" : 0.928971, "medianMs" : 0.928928, "percentage" : 4.72272 }
+, { "name" : "/dec2/conv2/conv2.0/Conv + /dec2/conv2/conv2.2/Relu", "timeMs" : 19.6213, "averageMs" : 0.1182, "medianMs" : 0.11824, "percentage" : 0.600911 }
+, { "name" : "/dec1/Resize", "timeMs" : 18.9909, "averageMs" : 0.114403, "medianMs" : 0.114336, "percentage" : 0.581606 }
+, { "name" : "/dec1/Resize_output_0 copy", "timeMs" : 36.8731, "averageMs" : 0.222127, "medianMs" : 0.222048, "percentage" : 1.12925 }
+, { "name" : "/dec1/conv1/conv1.0/Conv + /dec1/conv1/conv1.2/Relu", "timeMs" : 176.837, "averageMs" : 1.06528, "medianMs" : 1.06526, "percentage" : 5.41571 }
+, { "name" : "/dec1/conv2/conv2.0/Conv + /dec1/conv2/conv2.2/Relu", "timeMs" : 34.8073, "averageMs" : 0.209683, "medianMs" : 0.209664, "percentage" : 1.06599 }
+, { "name" : "/dec0/Resize", "timeMs" : 37.1928, "averageMs" : 0.224053, "medianMs" : 0.223856, "percentage" : 1.13905 }
+, { "name" : "/dec0/conv1/conv1.0/Conv + /dec0/conv1/conv1.2/Relu", "timeMs" : 128.768, "averageMs" : 0.775709, "medianMs" : 0.775744, "percentage" : 3.94357 }
+, { "name" : "/dec0/conv2/conv2.0/Conv + /dec0/conv2/conv2.2/Relu", "timeMs" : 92.7638, "averageMs" : 0.558818, "medianMs" : 0.558944, "percentage" : 2.84093 }
+, { "name" : "/head/Conv", "timeMs" : 50.6879, "averageMs" : 0.305349, "medianMs" : 0.305376, "percentage" : 1.55234 }
+, { "name" : "Reformatting CopyNode for Output Tensor 0 to /head/Conv", "timeMs" : 44.0633, "averageMs" : 0.265442, "medianMs" : 0.265376, "percentage" : 1.34946 }
+]

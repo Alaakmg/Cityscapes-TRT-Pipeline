@@ -1,0 +1,15 @@
+{
+  "layer_precisions": {
+    "Float": 110,
+    "Int8": 74,
+    "Half": 2
+  },
+  "onnx": "/home/alaakmg/models/probes/w0.5_half.onnx",
+  "engine": "/home/alaakmg/results/arch/w0.5_half_int8/model.engine",
+  "fp16": false,
+  "int8": true,
+  "calib_images": 32,
+  "engine_mb": 33.65,
+  "build_seconds": 283.1,
+  "trt_version": "10.16.2.10"
+}
