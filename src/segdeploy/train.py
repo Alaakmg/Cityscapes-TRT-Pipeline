@@ -66,7 +66,9 @@ def main() -> None:
     )
     val_dl = DataLoader(val_ds, batch_size=cfg["batch_size"], num_workers=cfg.get("workers", 4))
 
-    model = build_model(pretrained=True).to(device)
+    arch = {"width_mult": float(cfg.get("decoder_width_mult", 1.0)), "full_res": bool(cfg.get("full_res", True))}
+    model = build_model(pretrained=True, **arch).to(device)
+    print(f"arch {arch}: {sum(p.numel() for p in model.parameters()) / 1e6:.1f}M params")
     criterion = nn.CrossEntropyLoss()
     opt = torch.optim.AdamW(model.parameters(), lr=cfg["lr"], weight_decay=cfg["weight_decay"])
 
@@ -121,11 +123,12 @@ def main() -> None:
         print(f"epoch {epoch + 1}: val mIoU={miou:.4f}")
         print(cm.summary(CATEGORY_NAMES))
 
-        torch.save({"model": model.state_dict(), "epoch": epoch, "miou": miou}, out_dir / "last.pt")
+        torch.save({"model": model.state_dict(), "arch": arch, "epoch": epoch, "miou": miou}, out_dir / "last.pt")
         if miou > best_miou:
             best_miou = miou
             torch.save(
-                {"model": model.state_dict(), "epoch": epoch, "miou": miou}, out_dir / "best.pt"
+                {"model": model.state_dict(), "arch": arch, "epoch": epoch, "miou": miou},
+                out_dir / "best.pt",
             )
             print(f"  -> new best ({best_miou:.4f}), saved {out_dir / 'best.pt'}")
 

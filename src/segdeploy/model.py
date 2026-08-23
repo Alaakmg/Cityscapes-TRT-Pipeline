@@ -44,9 +44,28 @@ class DecoderBlock(nn.Module):
         return self.conv2(x)
 
 
+BASE_DECODER_WIDTHS = (512, 256, 128, 64, 32)  # dec4 .. dec0 output channels
+
+
 class ResNet50UNet(nn.Module):
-    def __init__(self, num_classes: int = 8, pretrained: bool = True):
+    """ResNet50 encoder + U-Net decoder.
+
+    `width_mult` scales the decoder channel widths (the encoder is untouched:
+    on the Jetson the decoder is ~2/3 of the latency, the encoder 1/3).
+    `full_res=False` drops the full-resolution block dec0 and predicts at 1/2
+    resolution, upsampling the logits x2 - the usual real-time-segmentation
+    trade: the full-res 3x3 convs are the single most expensive layers.
+    """
+
+    def __init__(
+        self,
+        num_classes: int = 8,
+        pretrained: bool = True,
+        width_mult: float = 1.0,
+        full_res: bool = True,
+    ):
         super().__init__()
+        self.arch = {"width_mult": width_mult, "full_res": full_res}
         weights = "IMAGENET1K_V2" if pretrained else None
         r = resnet50(weights=weights)
 
@@ -57,12 +76,18 @@ class ResNet50UNet(nn.Module):
         self.layer3 = r.layer3                             # /16, 1024ch
         self.layer4 = r.layer4                             # /32, 2048ch
 
-        self.dec4 = DecoderBlock(2048, 1024, 512)          # /16
-        self.dec3 = DecoderBlock(512, 512, 256)            # /8
-        self.dec2 = DecoderBlock(256, 256, 128)            # /4
-        self.dec1 = DecoderBlock(128, 64, 64)              # /2
-        self.dec0 = DecoderBlock(64, 0, 32)                # /1
-        self.head = nn.Conv2d(32, num_classes, 1)
+        w4, w3, w2, w1, w0 = [max(8, round(c * width_mult)) for c in BASE_DECODER_WIDTHS]
+        self.dec4 = DecoderBlock(2048, 1024, w4)           # /16
+        self.dec3 = DecoderBlock(w4, 512, w3)              # /8
+        self.dec2 = DecoderBlock(w3, 256, w2)              # /4
+        self.dec1 = DecoderBlock(w2, 64, w1)               # /2
+        self.full_res = full_res
+        if full_res:
+            self.dec0 = DecoderBlock(w1, 0, w0)            # /1
+            self.head = nn.Conv2d(w0, num_classes, 1)
+        else:
+            self.dec0 = None
+            self.head = nn.Conv2d(w1, num_classes, 1)      # /2, logits upsampled x2
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         s1 = self.stem(x)              # /2
@@ -75,12 +100,35 @@ class ResNet50UNet(nn.Module):
         d = self.dec3(d, s3)
         d = self.dec2(d, s2)
         d = self.dec1(d, s1)
-        d = self.dec0(d, None)
-        return self.head(d)
+        if self.full_res:
+            d = self.dec0(d, None)
+            return self.head(d)
+        out = self.head(d)
+        return F.interpolate(out, scale_factor=2, mode="bilinear", align_corners=False)
 
 
-def build_model(num_classes: int = 8, pretrained: bool = True) -> ResNet50UNet:
-    return ResNet50UNet(num_classes=num_classes, pretrained=pretrained)
+def build_model(
+    num_classes: int = 8,
+    pretrained: bool = True,
+    width_mult: float = 1.0,
+    full_res: bool = True,
+) -> ResNet50UNet:
+    return ResNet50UNet(
+        num_classes=num_classes, pretrained=pretrained, width_mult=width_mult, full_res=full_res
+    )
+
+
+def build_model_from_checkpoint(state: dict, pretrained: bool = False) -> ResNet50UNet:
+    """Rebuild the exact architecture a checkpoint was trained with.
+
+    Checkpoints carry an `arch` dict (see train.py); older ones without it
+    are the default full-width, full-resolution model.
+    """
+    return build_model(pretrained=pretrained, **state.get("arch", {}))
+
+
+def count_params(model: nn.Module) -> int:
+    return sum(p.numel() for p in model.parameters())
 
 
 def fold_batchnorm(model: nn.Module) -> int:

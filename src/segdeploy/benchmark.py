@@ -64,13 +64,17 @@ def main() -> None:
     if args.backend == "torch":
         import torch
 
-        from .model import build_model
+        from .model import build_model_from_checkpoint
         from .runners import TorchRunner
 
-        model = build_model(pretrained=False)
         if args.checkpoint:
             state = torch.load(args.checkpoint, map_location="cpu")
+            model = build_model_from_checkpoint(state)
             model.load_state_dict(state.get("model", state))
+        else:
+            from .model import build_model
+
+            model = build_model(pretrained=False)
         runner = TorchRunner(model)
     elif args.backend == "onnx":
         from .runners import OnnxRunner

@@ -16,7 +16,7 @@ import sys
 import numpy as np
 import torch
 
-from segdeploy.model import build_model
+from segdeploy.model import build_model_from_checkpoint
 from segdeploy.runners import OnnxRunner, TorchRunner
 
 
@@ -32,8 +32,8 @@ def main() -> None:
     ap.add_argument("--out", help="Write parity stats to this JSON file")
     args = ap.parse_args()
 
-    model = build_model(pretrained=False).eval()
     state = torch.load(args.checkpoint, map_location="cpu")
+    model = build_model_from_checkpoint(state).eval()
     model.load_state_dict(state.get("model", state))
     torch_runner = TorchRunner(model, device="cpu")
     onnx_runner = OnnxRunner(args.onnx)

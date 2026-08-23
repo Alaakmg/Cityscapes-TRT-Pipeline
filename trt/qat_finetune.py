@@ -50,7 +50,7 @@ from torchvision.models.resnet import Bottleneck
 from segdeploy.data import CityscapesCategories
 from segdeploy.labels import CATEGORY_NAMES
 from segdeploy.logging_utils import MetricsLogger
-from segdeploy.model import DecoderBlock, build_model, fold_batchnorm
+from segdeploy.model import DecoderBlock, build_model_from_checkpoint, fold_batchnorm
 from segdeploy.train import evaluate, set_seed
 
 
@@ -144,8 +144,8 @@ def main() -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     size_hw = tuple(cfg["size_hw"])
 
-    model = build_model(pretrained=False).to(device)
     state = torch.load(args.checkpoint, map_location="cpu")
+    model = build_model_from_checkpoint(state).to(device)
     model.load_state_dict(state.get("model", state))
     if not args.no_bn_fold:
         print(f"batchnorm folded into {fold_batchnorm(model)} convs")

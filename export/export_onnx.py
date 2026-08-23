@@ -13,7 +13,7 @@ import argparse
 import onnx
 import torch
 
-from segdeploy.model import build_model
+from segdeploy.model import build_model, build_model_from_checkpoint, count_params
 
 
 def add_argmax_output(model: onnx.ModelProto) -> onnx.ModelProto:
@@ -44,17 +44,26 @@ def add_argmax_output(model: onnx.ModelProto) -> onnx.ModelProto:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--checkpoint", required=True)
+    ap.add_argument("--checkpoint", help="Trained checkpoint; omit for an untrained latency probe")
     ap.add_argument("--out", default="model.onnx")
     ap.add_argument("--height", type=int, default=512)
     ap.add_argument("--width", type=int, default=1024)
     ap.add_argument("--opset", type=int, default=17)
     ap.add_argument("--argmax", action="store_true", help="Export the class mask instead of logits")
+    ap.add_argument("--width-mult", type=float, default=1.0, help="(no checkpoint) decoder width")
+    ap.add_argument("--no-full-res", action="store_true", help="(no checkpoint) predict at 1/2 res")
     args = ap.parse_args()
 
-    model = build_model(pretrained=False).eval()
-    state = torch.load(args.checkpoint, map_location="cpu")
-    model.load_state_dict(state.get("model", state))
+    if args.checkpoint:
+        state = torch.load(args.checkpoint, map_location="cpu")
+        model = build_model_from_checkpoint(state).eval()
+        model.load_state_dict(state.get("model", state))
+    else:
+        # Untrained export: latency depends on the architecture, not the
+        # weights, so this is how decoder variants get measured on the
+        # target before any of them is trained.
+        model = build_model(pretrained=False, width_mult=args.width_mult, full_res=not args.no_full_res).eval()
+        print(f"untrained export, arch {model.arch}, {count_params(model) / 1e6:.1f}M params")
 
     dummy = torch.randn(1, 3, args.height, args.width)
     torch.onnx.export(

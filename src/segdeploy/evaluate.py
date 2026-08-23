@@ -25,11 +25,11 @@ def build_runner(args):
     if args.backend == "torch":
         import torch
 
-        from .model import build_model
+        from .model import build_model_from_checkpoint
         from .runners import TorchRunner
 
-        model = build_model(pretrained=False)
         state = torch.load(args.checkpoint, map_location="cpu")
+        model = build_model_from_checkpoint(state)
         model.load_state_dict(state.get("model", state))
         return TorchRunner(model)
     if args.backend == "onnx":
