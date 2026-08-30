@@ -1,5 +1,7 @@
 # cityscapes-trt-pipeline
 
+[![ci](https://github.com/Alaakmg/Cityscapes-TRT-Pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Alaakmg/Cityscapes-TRT-Pipeline/actions/workflows/ci.yml)
+
 Deployment pipeline for a Cityscapes semantic segmentation model (ResNet50 U-Net,
 8 categories): PyTorch -> ONNX -> TensorRT (FP32 / FP16 / INT8-PTQ / INT8-QAT),
 targeting a Jetson Orin Nano.
