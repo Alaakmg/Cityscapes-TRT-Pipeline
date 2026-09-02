@@ -30,6 +30,11 @@ Every number is measured on the deployed TensorRT engine, on the device named:
 
 ![decoder pareto](docs/jetson_pareto_arch.png)
 
+The same points on the energy axis: the 0.25/half INT8 decoder holds the
+baseline's PTQ accuracy at half the millijoules per frame.
+
+![energy pareto](docs/jetson_energy_pareto.png)
+
 Precision sets the energy per frame; the power mode only sets the frame rate:
 
 ![jetson power modes](docs/jetson_power_modes.png)
@@ -163,7 +168,7 @@ Every stage writes its numbers to disk, nothing lives only in stdout:
 | `benchmark.py --out b.json` | summary stats + raw per-iteration latencies | latency histograms, p99 / tail analysis |
 | `check_parity.py --out p.json` | max abs/rel diff, argmax mismatch, pass flag | export fidelity across opsets/versions |
 | `build_engine.py` | `<engine>.meta.json` (precision, size, build time, TRT version) | size vs precision, engine provenance |
-| `power.py` | reads `tegrastats.log` + `b.json` -> W and mJ per frame over the run | Jetson energy tables, power-mode sweep (`--rebuild-sweep`) |
+| `power.py` | reads `tegrastats.log` + `b.json` -> W and mJ per frame over the run; `--write` leaves `energy.json` beside the bench | Jetson energy tables, energy Pareto, power-mode sweep (`--rebuild-sweep`) |
 
 One directory per variant (`results/trt_fp16/`, `results/trt_int8_qat/`, ...).
 Engines are disposable, their `.meta.json` sidecars are not.

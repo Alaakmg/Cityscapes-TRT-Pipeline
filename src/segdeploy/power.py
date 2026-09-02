@@ -23,6 +23,7 @@ alongside as a cross-check; it sits a few percent below W on short runs.
 
 Usage:
     python -m segdeploy.power results/jetson_orin_nano/trt_int8_ptq ...
+    python -m segdeploy.power --write <run dirs>      # + energy.json per run
     python -m segdeploy.power --rebuild-sweep results/jetson_orin_nano/sweep
 """
 
@@ -138,6 +139,8 @@ def main():
     ap.add_argument("runs", nargs="*", help="result dirs with bench.json + tegrastats.log")
     ap.add_argument("--rebuild-sweep", metavar="SWEEP_DIR", help="rewrite <SWEEP_DIR>/summary.json")
     ap.add_argument("--warmup", type=int, default=20)
+    ap.add_argument("--write", action="store_true",
+                    help="also write <run>/energy.json beside each run's bench.json")
     args = ap.parse_args()
 
     hdr = f"{'run':44s} {'ms':>7s} {'W':>6s} {'mJ':>6s} {'W_busy':>7s} {'W_idle':>7s} {'W_log':>6s} {'busy':>5s}"
@@ -152,6 +155,8 @@ def main():
         print(hdr)
         for d in args.runs:
             e = energy_for_run(d, args.warmup)
+            if args.write:
+                (Path(d) / "energy.json").write_text(json.dumps(e, indent=1) + "\n")
             print(f"{d:44s} {e['ms']:7.2f} {e['W']:6.2f} {e['mJ']:6.0f} {e['W_busy']:7.2f} "
                   f"{e['W_idle']:7.2f} {e['W_logmean']:6.2f} {e['n_busy']:3d}/{e['n']}")
 

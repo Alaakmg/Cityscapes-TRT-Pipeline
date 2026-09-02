@@ -379,6 +379,12 @@ which keeps the BN-folded model stable (0.8295 epoch 1, 0.8289 epoch 2).
 | QAT v3 (+BN folded) | 113 | 102 / 2 / 9 | 24.6 | 26.4 | 37.9 | 18.0 | 475 | 0.8268 |
 | **QAT v4 (+concat Q/DQ)** | **101** | **100 / 0 / 1** | **18.2** | **19.9** | **50.2** | **18.3** | **365** | **0.8296** |
 
+![qat stage time](qat_stage_time.png)
+
+Stage by stage, the four revisions were an encoder story: 16.4 ms of encoder
+compute at v1, 6.0 at v4, while the decoder held at 12.9 ms until the concat
+quantizers landed.
+
 v4 is faster than PTQ (18.2 vs 18.7 ms compute) and 0.6 mIoU points more
 accurate, at the same 45 MB. Against FP16: 1.9x faster, 2.3x less
 energy per frame, for 0.4 mIoU points. That is the best point on the whole
@@ -386,6 +392,12 @@ chart, and it took four engines to get there, each one fixing a specific
 layer the profiler had named. Per-class at v4:
 object 0.607, human 0.769 (FP32: 0.616, 0.774). The thin classes lost
 ~1 point and nothing else moved.
+
+Where the remaining errors go, INT8 minus FP32 per true class: PTQ pushes
+2.1% of nature's pixels into construction and 1.3% of object's; QAT v4 moves
+nothing past 0.4 points.
+
+![confusion delta](confusion_delta.png)
 
 Why v4 beats PTQ rather than matching it: with every tensor explicitly
 quantized, TensorRT has no precision decisions left to make and no reformats
@@ -426,6 +438,8 @@ block to predict at 1/2 res with a bilinear x2 on the logits.
   the parameters of their full-res twins and are 14-19% faster; 0.5x width
   keeps 74% of the parameters and loses 24-36% of the latency.
 
+![encoder floor](decoder_encoder_floor.png)
+
 Accuracy is the other axis; three variants got the full 60-epoch training
 (~$1.1 each), then FP16 and INT8-PTQ engines on the Jetson, per-variant
 calibration on train images:
@@ -457,6 +471,20 @@ What the curve says:
 - Obvious next step if this were a product: the QAT v4 recipe on 0.25/half
   (would recover most of its PTQ loss at ~11 ms), and then the backbone,
   which is now the floor (7 ms of the 11.3).
+
+The same points on the energy axis, and what the narrow decoders cost per class:
+
+![energy pareto](jetson_energy_pareto.png)
+
+![decoder class cost](decoder_class_cost.png)
+
+0.25/full pays 4.1 points on human and 3.3 on object against the baseline
+INT8-PTQ engine; 0.25/half cuts that to 0.6 and 1.5 and gains on nature and
+construction. Training tells the same story from the other end: the narrow
+decoders start far behind (0.25/full at 0.18 mIoU after epoch 1) and finish
+0.2 to 0.7 points under the baseline.
+
+![decoder training](decoder_training.png)
 
 ## Toolchain notes (the parts nobody's blog post mentions)
 
