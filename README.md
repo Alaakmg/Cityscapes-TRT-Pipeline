@@ -65,6 +65,8 @@ folded before quantization, 2), v4 (+ decoder concat inputs quantized, 0). v4 is
 fully INT8, faster than PTQ and +0.6 mIoU over it on the Jetson: 19.9 ms, 50 fps,
 365 mJ/frame, 0.8296. The story is in [`docs/findings.md`](docs/findings.md).
 
+![qat path](docs/qat_path.png)
+
 FP16 on the desktop: 3.8x faster than eager PyTorch, 2.2x smaller than the FP32 engine
 (90 vs 195 MB), zero measurable mIoU loss
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
@@ -74,6 +76,8 @@ Jetson: INT8 is 1.9x faster than FP16 and 2.3x more energy-efficient
 (QAT v4: 365 vs 848 mJ/frame) for −0.4 mIoU point. The desktop table alone
 argues the other way; the Jetson is the device that ships. Details and the
 profiling breakdown in [`docs/findings.md`](docs/findings.md).
+
+![platform speedup](docs/platform_speedup.png)
 
 Power-mode sweep (all engines, 15 W / 25 W / MAXN_SUPER, clocks locked and DVFS):
 energy per frame is set by the precision, the power mode only moves latency.
@@ -165,13 +169,8 @@ Every stage writes its numbers to disk, nothing lives only in stdout:
 One directory per variant (`results/trt_fp16/`, `results/trt_int8_qat/`, ...).
 Engines are disposable, their `.meta.json` sidecars are not.
 
-Training curves come from:
-
-```bash
-python scripts/plot_training.py --run runs/fp32 --out docs/curves_fp32.png
-# overlay runs, e.g. baseline vs QAT:
-python scripts/plot_training.py --run runs/fp32 --run runs/qat --out docs/curves_qat.png
-```
+`scripts/plot_training.py` draws quick loss and mIoU curves from a run's
+`metrics.jsonl` (`--run runs/fp32 --out curves.png`; several `--run` overlay).
 
 ## Design notes
 

@@ -11,7 +11,7 @@ out at 0.786 with 60.5M params. This one does +4.7 points with 44M, mostly
 thanks to the ImageNet-pretrained ResNet50 encoder (epoch 1 already hits 0.748)
 and a properly scheduled AdamW + cosine run.
 
-![training curves](curves_fp32.png)
+![training loss](training_loss.png)
 
 Per-class IoU makes the difficulty ranking obvious, and it never changes across
 backends or precisions:
@@ -84,6 +84,8 @@ before training even started. The trail, because the diagnosis is the finding:
    measures **0.8290**. The fake-quant model predicted its deployed accuracy
    to under a tenth of a point, which is the promise of QAT.
 
+![calibration collapse](calibration_collapse.png)
+
 modelopt sharp edges hit on the way (v0.46): `quant_cfg` patterns are
 `*input_quantizer` (no trailing star) with settings nested under `cfg`, so a
 wrong pattern silently no-ops, so assert your config applied; the stock max
@@ -122,6 +124,8 @@ Accuracy on-device matches the desktop to the 4th decimal for FP16 and QAT; PTQ
 lands at 0.8236 vs 0.8246 from the same calibration cache (TensorRT picked
 different kernels, the scales are identical).
 
+![class damage](class_damage_int8.png)
+
 GPU temperature peaked at 66 C under sustained locked-clock load, 33 C below the
 throttle point. No thermal effect on any number.
 
@@ -139,6 +143,8 @@ mean as `W_logmean` / `mJ_logmean`. Latencies and mIoU are untouched. What
 changed: absolute energy rose 10-45% (most for INT8 and the narrow decoders),
 the INT8-vs-FP16 energy ratio fell from 2.4x to 2.1-2.2x, and the "energy per
 frame is set by precision, not mode" finding got cleaner, not weaker.
+
+![power trace](power_trace.png)
 
 ### Power-mode sweep: precision sets the energy, the mode sets the frame rate
 
@@ -178,6 +184,8 @@ DVFS vs locked clocks: means within 1-4%, p95 a little wider under DVFS (INT8 at
 MAXN_SUPER: 25.4 vs 23.6 ms). A 20-iteration warm-up is enough for the governor
 to ramp; locking clocks mostly buys tail determinism, and that is what I report.
 
+![dvfs tails](dvfs_tails.png)
+
 ### What the profiler says (`trtexec --dumpProfile`)
 
 Transfers are not the problem. H2D 0.35-0.48 ms, D2H 0.83-0.94 ms per frame
@@ -193,6 +201,10 @@ INT8 and worth fixing (pinned buffers, argmax on device to shrink the output
 | decoder (5 blocks) | 25.0 | 66% |
 | ResNet50 encoder | 12.1 | 32% |
 | head | 0.7 | 2% |
+
+![layer profile](layer_profile_fp16.png)
+
+![stage share](stage_share.png)
 
 The encoder holds nearly all the parameters and a third of the time. The
 decoder's first 3x3 conv in every block sits at the top of the profile
@@ -243,6 +255,8 @@ fixes, measured separately on the same engines at the same locked clocks:
 | INT8-PTQ | 22.9 | **20.4** | 20.5 | 19.8 |
 | INT8-QAT | 34.3 | **31.8** | - | - |
 
+![harness ladder](harness_ladder.png)
+
 Pinned host buffers: -2.5 ms on every engine (11% at INT8), landing within
 0.6 ms of trtexec. Pageable numpy arrays force the driver to stage every copy
 through an internal pinned buffer; allocating the host side as pinned torch
@@ -275,6 +289,8 @@ That histogram also put a number on the QAT problem:
 | FP16 | 0 | 85 | 1 |
 | INT8-PTQ | 77 | 0 | 1 |
 | INT8-QAT | 84 | **48** | 5 |
+
+![precision layers](precision_layers.png)
 
 48 layers of the QAT engine run in FP16: the unquantized residual paths and
 the re-quantization around them. That is the target for QAT v2.
@@ -363,6 +379,8 @@ Training note: with BN folded, the fine-tune **diverged after epoch 1** (0.8267
 v1/v2 fine-tunes stable; the best-epoch checkpoint logic saved the run, at
 0.2 pts below v2. v4 gets a lower learning rate.
 
+![qat fine-tune](qat_finetune.png)
+
 ### QAT v4: quantize the concat inputs. Done.
 
 Quantizers on both inputs of every decoder concat (placed *before* the
@@ -439,6 +457,8 @@ block to predict at 1/2 res with a bilinear x2 on the logits.
   keeps 74% of the parameters and loses 24-36% of the latency.
 
 ![encoder floor](decoder_encoder_floor.png)
+
+![params vs latency](params_latency.png)
 
 Accuracy is the other axis; three variants got the full 60-epoch training
 (~$1.1 each), then FP16 and INT8-PTQ engines on the Jetson, per-variant
