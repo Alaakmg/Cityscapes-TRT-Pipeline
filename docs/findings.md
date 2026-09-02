@@ -104,17 +104,18 @@ decided on the Jetson.
 
 JetPack 7.2.1, TensorRT 10.16.2, MAXN_SUPER with locked clocks (GPU 1.02 GHz,
 EMC 3.2 GHz). Same ONNX files as the desktop, engines built on the device.
-Power is module input (`VDD_IN`) from `tegrastats` at 2 Hz during the benchmark.
+Power is module input (`VDD_IN`) from `tegrastats` at 2 Hz, averaged over the
+benchmark's run time (see the correction note below).
 
 | engine | mIoU | mean ms | p95 ms | img/s | MB | power | mJ/frame |
 |---|---|---|---|---|---|---|---|
-| FP32 | 0.8334 | 111.7 | 112.5 | 9.0 | 176 | 16.6 W | 1848 |
-| FP16 | 0.8334 | 41.6 | 42.4 | 24.1 | 88 | 15.2 W | 632 |
-| INT8-PTQ | 0.8236 | **22.9** | 23.6 | **43.6** | 45 | **11.7 W** | **268** |
-| INT8-QAT | 0.8290 | 34.3 | 35.0 | 29.1 | 45 | 13.0 W | 445 |
+| FP32 | 0.8334 | 111.7 | 112.5 | 9.0 | 176 | 19.0 W | 2124 |
+| FP16 | 0.8334 | 41.6 | 42.4 | 24.1 | 88 | 20.4 W | 848 |
+| INT8-PTQ | 0.8236 | **22.9** | 23.6 | **43.6** | 45 | **16.4 W** | **377** |
+| INT8-QAT | 0.8290 | 34.3 | 35.0 | 29.1 | 45 | 17.4 W | 597 |
 
 On the desktop, INT8 bought nothing (2.94 vs 2.96 ms). Here, INT8-PTQ is
-1.8x faster than FP16 and 2.4x cheaper per frame in energy, for one mIoU
+1.8x faster than FP16 and 2.2x cheaper per frame in energy, for one mIoU
 point. On a 68 GB/s device, halving the bytes moved per layer shows up
 directly in the frame time; on a 1.8 TB/s desktop card it never did.
 Accuracy on-device matches the desktop to the 4th decimal for FP16 and QAT; PTQ
@@ -123,6 +124,21 @@ different kernels, the scales are identical).
 
 GPU temperature peaked at 66 C under sustained locked-clock load, 33 C below the
 throttle point. No thermal effect on any number.
+
+**Power method, corrected 2026-09-02.** The first pass averaged `VDD_IN` over
+every sample in the log. The logs start and end at idle (~6 W), so that mean
+mixed idle into the number, and the shorter the run the worse it got: a 5 s
+INT8 run in a 10 s log was half idle. The bias favoured the fast engines,
+which is the wrong direction to be wrong in. `segdeploy.power` now integrates
+the energy above the pre-run idle baseline over the whole log and divides it
+by the run's known duration (220 iterations x mean latency), which is also
+insensitive to the sensor's ramp at the start and decay at the end of a run.
+Every W and mJ figure in this file, the README, the write-up and the ADRs was
+regenerated from the raw logs; `sweep/summary.json` keeps the old whole-log
+mean as `W_logmean` / `mJ_logmean`. Latencies and mIoU are untouched. What
+changed: absolute energy rose 10-45% (most for INT8 and the narrow decoders),
+the INT8-vs-FP16 energy ratio fell from 2.4x to 2.1-2.2x, and the "energy per
+frame is set by precision, not mode" finding got cleaner, not weaker.
 
 ### Power-mode sweep: precision sets the energy, the mode sets the frame rate
 
@@ -134,26 +150,26 @@ governor. 24 runs, full table in `results/jetson_orin_nano/sweep/summary.json`.
 
 | locked clocks | 15 W | 25 W | MAXN_SUPER |
 |---|---|---|---|
-| FP32 | 179.7 ms, 1878 mJ | 121.5 ms, 1832 mJ | 111.5 ms, 1862 mJ |
-| FP16 | 64.9 ms, 645 mJ | 44.2 ms, 606 mJ | 41.5 ms, 621 mJ |
-| INT8-PTQ | 36.0 ms, 283 mJ | 25.0 ms, 258 mJ | 22.9 ms, 261 mJ |
-| INT8-QAT | 54.2 ms, 482 mJ | 37.1 ms, 441 mJ | 34.3 ms, 443 mJ |
+| FP32 | 179.7 ms, 2040 mJ | 121.5 ms, 2076 mJ | 111.5 ms, 2149 mJ |
+| FP16 | 64.9 ms, 774 mJ | 44.2 ms, 811 mJ | 41.5 ms, 835 mJ |
+| INT8-PTQ | 36.0 ms, 384 mJ | 25.0 ms, 380 mJ | 22.9 ms, 389 mJ |
+| INT8-QAT | 54.2 ms, 593 mJ | 37.1 ms, 586 mJ | 34.3 ms, 595 mJ |
 
 Three things I did not expect to be this clean:
 
-1. **Energy per frame barely moves with power mode.** INT8-PTQ costs ~260-280 mJ
-   per frame at every mode; FP16 ~600-650. The modes trade latency for power
+1. **Energy per frame barely moves with power mode.** INT8-PTQ costs 380-390 mJ
+   per frame at every mode; FP16 770-840. The modes trade latency for power
    almost linearly, so the energy bill is a property of the precision. If the
    budget is joules (battery), pick the precision; if it is milliseconds, pick
    the mode.
-2. **The INT8 advantage is constant.** 1.77-1.81x faster and 2.3-2.4x less
+2. **The INT8 advantage is constant.** 1.77-1.81x faster and 2.0-2.1x less
    energy than FP16 at all three modes. Not a Super-mode artifact.
 3. **Super mode buys latency, not efficiency.** Vs 25 W it is 6-8% faster
    (GPU clock +11%, memory clock unchanged; the workload is partly
-   memory-bound, so it doesn't scale with GPU clock) at ~10% more power, same
-   mJ/frame.
+   memory-bound, so it doesn't scale with GPU clock) at 10-12% more power, 2-3%
+   more mJ/frame.
 
-Decision table for a 30 fps target: INT8-PTQ at 25 W (40 fps, 10.3 W) is the
+Decision table for a 30 fps target: INT8-PTQ at 25 W (40 fps, 15.2 W) is the
 answer; FP16 never gets there, even at MAXN_SUPER (24 fps). INT8-QAT at
 MAXN_SUPER just misses (29 fps); the residual-quantization fix below is
 aimed at that.
@@ -356,15 +372,15 @@ which keeps the BN-folded model stable (0.8295 epoch 1, 0.8289 epoch 2).
 
 | Jetson, MAXN_SUPER | layers | Int8 / Half / Float | trtexec compute | harness | fps | W | mJ/frame | mIoU |
 |---|---|---|---|---|---|---|---|---|
-| FP16 | 85 | 0 / 85 / 1 | 37.2 | 38.9 | 25.7 | 15.2 | 632 | 0.8334 |
-| INT8-PTQ | 78 | 77 / 0 / 1 | 18.7 | 20.4 | 49.0 | 11.7 | 261 | 0.8236 |
-| QAT v1 | 137 | 84 / 48 / 5 | 29.9 | 31.6 | 31.6 | 12.9 | 407 | 0.8290 |
-| QAT v2 (+residual Q/DQ) | 129 | 102 / 18 / 9 | 27.9 | 29.6 | 33.8 | 13.0 | 384 | 0.8287 |
-| QAT v3 (+BN folded) | 113 | 102 / 2 / 9 | 24.6 | 26.4 | 37.9 | 12.7 | 336 | 0.8268 |
-| **QAT v4 (+concat Q/DQ)** | **101** | **100 / 0 / 1** | **18.2** | **19.9** | **50.2** | **11.7** | **234** | **0.8296** |
+| FP16 | 85 | 0 / 85 / 1 | 37.2 | 38.9 | 25.7 | 20.4 | 848 | 0.8334 |
+| INT8-PTQ | 78 | 77 / 0 / 1 | 18.7 | 20.4 | 49.0 | 16.4 | 377 | 0.8236 |
+| QAT v1 | 137 | 84 / 48 / 5 | 29.9 | 31.6 | 31.6 | 18.2 | 576 | 0.8290 |
+| QAT v2 (+residual Q/DQ) | 129 | 102 / 18 / 9 | 27.9 | 29.6 | 33.8 | 19.3 | 572 | 0.8287 |
+| QAT v3 (+BN folded) | 113 | 102 / 2 / 9 | 24.6 | 26.4 | 37.9 | 18.0 | 475 | 0.8268 |
+| **QAT v4 (+concat Q/DQ)** | **101** | **100 / 0 / 1** | **18.2** | **19.9** | **50.2** | **18.3** | **365** | **0.8296** |
 
 v4 is faster than PTQ (18.2 vs 18.7 ms compute) and 0.6 mIoU points more
-accurate, at the same 45 MB and power. Against FP16: 1.9x faster, 2.7x less
+accurate, at the same 45 MB. Against FP16: 1.9x faster, 2.3x less
 energy per frame, for 0.4 mIoU points. That is the best point on the whole
 chart, and it took four engines to get there, each one fixing a specific
 layer the profiler had named. Per-class at v4:
@@ -418,10 +434,10 @@ calibration on train images:
 
 | variant | FP16 ms / mIoU | INT8 ms / mIoU | INT8 fps | INT8 mJ/frame |
 |---|---|---|---|---|
-| 1.0/full (baseline) | 38.9 / 0.8334 | 20.4 / 0.8236 (QAT v4 19.9 / 0.8296) | 50 | 234-261 |
-| 0.5/full | 25.5 / 0.8312 | 15.7 / 0.8240 | 64 | 167 |
-| 0.25/full | 21.0 / 0.8256 | 12.9 / 0.8125 | 78 | 130 |
-| 0.25/half | 19.4 / 0.8279 | **11.3 / 0.8236** | **88** | **109** |
+| 1.0/full (baseline) | 38.9 / 0.8334 | 20.4 / 0.8236 (QAT v4 19.9 / 0.8296) | 50 | 365-389 |
+| 0.5/full | 25.5 / 0.8312 | 15.7 / 0.8240 | 64 | 292 |
+| 0.25/full | 21.0 / 0.8256 | 12.9 / 0.8125 | 78 | 215 |
+| 0.25/half | 19.4 / 0.8279 | **11.3 / 0.8236** | **88** | **189** |
 
 What the curve says:
 
@@ -434,8 +450,8 @@ What the curve says:
   bilinear x2 on the logits beats a starved full-resolution block. I would
   not have guessed that; the measurement did.
 - The headline: 0.25/half INT8 matches the baseline's INT8-PTQ accuracy
-  (0.8236 exactly) at 1.8x the speed and 2.4x less energy. 11.3 ms,
-  88 fps, 109 mJ/frame, 29 MB engine, on a $400 board at 10 W.
+  (0.8236 exactly) at 1.8x the speed and 2.0x less energy. 11.3 ms,
+  88 fps, 189 mJ/frame, 29 MB engine, on a $400 board at 17 W.
 - The INT8 Pareto frontier is 0.25/half -> 0.5/full -> QAT-v4 baseline ->
   FP16 baseline. Everything else is dominated.
 - Obvious next step if this were a product: the QAT v4 recipe on 0.25/half

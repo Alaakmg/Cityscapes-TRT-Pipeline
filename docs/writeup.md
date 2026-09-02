@@ -39,10 +39,10 @@ On the Jetson the same engines say the opposite:
 
 | Jetson Orin Nano | mIoU | latency | energy/frame |
 |---|---|---|---|
-| TensorRT FP16 | 0.8334 | 38.9 ms | 632 mJ |
-| TensorRT INT8-PTQ | 0.8236 | 20.4 ms | 261 mJ |
+| TensorRT FP16 | 0.8334 | 38.9 ms | 848 mJ |
+| TensorRT INT8-PTQ | 0.8236 | 20.4 ms | 377 mJ |
 
-1.9x faster, 2.4x less energy. On a 68 GB/s device, halving the bytes moved
+1.9x faster, 2.2x less energy. On a 68 GB/s device, halving the bytes moved
 per layer is what the frame time responds to. Same model, same code, and the
 decision flips. Only one of the two devices ships. A power-mode sweep
 sharpened the rule: across 15 W, 25 W and MAXN modes, energy per frame is set
@@ -102,9 +102,9 @@ resolution with a bilinear x2 on the logits.
 
 | Jetson, INT8 | latency | mIoU | fps | energy/frame |
 |---|---|---|---|---|
-| baseline decoder | 20.4 ms | 0.8236 | 49 | 261 mJ |
-| 0.5x width | 15.7 ms | 0.8240 | 64 | 167 mJ |
-| 0.25x width, 1/2-res | **11.3 ms** | **0.8236** | **88** | **109 mJ** |
+| baseline decoder | 20.4 ms | 0.8236 | 49 | 377 mJ |
+| 0.5x width | 15.7 ms | 0.8240 | 64 | 292 mJ |
+| 0.25x width, 1/2-res | **11.3 ms** | **0.8236** | **88** | **189 mJ** |
 
 Halving the decoder costs 0.2 mIoU points. And the surprise: at 0.25x width,
 the half-resolution variant is faster *and more accurate* than its
@@ -112,7 +112,7 @@ full-resolution twin, in both precisions. A starved full-res block is worse
 than no full-res block. Neither FLOPs nor parameter counts predict any of
 this (the half-res variants have *identical* parameter counts to their
 full-res twins and are 14-19% faster). The final point: the baseline's INT8
-accuracy at 1.8x its speed, 88 fps at 10 W, in a 29 MB engine.
+accuracy at 1.8x its speed, 88 fps at 17 W, in a 29 MB engine.
 
 ## Takeaways
 

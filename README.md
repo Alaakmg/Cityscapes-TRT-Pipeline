@@ -17,7 +17,7 @@ Every number is measured on the deployed TensorRT engine, on the device named:
 
 - Desktop (RTX 5090): FP16 gives 3.8x over eager PyTorch at 2.8x smaller,
   with mIoU identical to four decimals. INT8 buys ~4% more. 2.4 ms / 419 img/s.
-- Jetson Orin Nano: INT8 is 1.9x faster than FP16 and takes 2.7x less energy
+- Jetson Orin Nano: INT8 is 1.9x faster than FP16 and takes 2.3x less energy
   per frame. Nothing in the desktop table predicts this.
 - QAT beat PTQ on both axes, but it took four engine iterations, each driven
   by a `trtexec` layer profile (residual Q/DQ, BatchNorm folding, concat
@@ -26,7 +26,7 @@ Every number is measured on the deployed TensorRT engine, on the device named:
 - The productive architecture knob was the decoder, not the 44M-param
   backbone: a 0.25-width decoder predicting at 1/2 resolution matches the
   baseline's INT8 accuracy at 1.8x the speed.
-  **11.3 ms / 88 fps / 109 mJ per frame at 10 W.**
+  **11.3 ms / 88 fps / 189 mJ per frame at 17 W.**
 
 ![decoder pareto](docs/jetson_pareto_arch.png)
 
@@ -43,7 +43,10 @@ Latency: batch 1, 512x1024, 20 warmup + 200 timed iterations, explicit device sy
 Desktop = RTX 5090 (RunPod), TensorRT 10.16.1, torch 2.8.0+cu128.
 Jetson = Orin Nano Super 8 GB, JetPack 7.2.1 (L4T R39.2.1, TensorRT 10.16.2, CUDA 13.2),
 power mode MAXN_SUPER with `jetson_clocks` (GPU locked 1.02 GHz, EMC 3.2 GHz).
-Jetson power = module input (`VDD_IN`) sampled by `tegrastats` at 2 Hz during the benchmark.
+Jetson power = module input (`VDD_IN`) sampled by `tegrastats` at 2 Hz, averaged over the
+benchmark's own run time (energy above the pre-run idle baseline, divided by
+220 iterations x mean latency; `segdeploy.power`). Idle samples before and after the run
+are excluded; an earlier revision averaged the whole log and under-reported by 10-45%.
 Raw JSONs, tegrastats logs and `trtexec` layer profiles in `results/`.
 
 | Variant | Precision | Device | mIoU | Δ vs FP32 | Latency mean (ms) | p95 (ms) | img/s | Size (MB) |
@@ -71,14 +74,14 @@ QAT went through four versions, each driven by a `trtexec` layer profile on the 
 v1 (plain Q/DQ, 48 FP16 layers), v2 (+ residual-branch quantizers, 18), v3 (+ BatchNorm
 folded before quantization, 2), v4 (+ decoder concat inputs quantized, 0). v4 is
 fully INT8, faster than PTQ and +0.6 mIoU over it on the Jetson: 19.9 ms, 50 fps,
-234 mJ/frame, 0.8296. The story is in [`docs/findings.md`](docs/findings.md).
+365 mJ/frame, 0.8296. The story is in [`docs/findings.md`](docs/findings.md).
 
 FP16 on the desktop: 3.8x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
 parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).
 
-Jetson: INT8 is 1.9x faster than FP16 and 2.7x more energy-efficient
-(QAT v4: 234 vs 632 mJ/frame) for −0.4 mIoU point. The desktop table alone
+Jetson: INT8 is 1.9x faster than FP16 and 2.3x more energy-efficient
+(QAT v4: 365 vs 848 mJ/frame) for −0.4 mIoU point. The desktop table alone
 argues the other way; the Jetson is the device that ships. Details and the
 profiling breakdown in [`docs/findings.md`](docs/findings.md).
 
@@ -88,14 +91,14 @@ INT8-PTQ is the only configuration above 30 fps at 25 W.
 
 | Jetson, clocks locked | 15 W | 25 W | MAXN_SUPER |
 |---|---|---|---|
-| FP16 ms / fps / W / mJ per frame | 64.9 / 15.4 / 9.9 / 645 | 44.2 / 22.6 / 13.7 / 606 | 41.5 / 24.1 / 15.0 / 621 |
-| INT8-PTQ ms / fps / W / mJ per frame | 36.0 / 27.8 / 7.9 / 283 | 25.0 / 40.0 / 10.3 / 258 | 22.9 / 43.6 / 11.4 / 261 |
-| INT8 vs FP16 | 1.80x faster, 2.3x less energy | 1.77x, 2.3x | 1.81x, 2.4x |
+| FP16 ms / fps / W / mJ per frame | 64.9 / 15.4 / 11.9 / 774 | 44.2 / 22.6 / 18.3 / 811 | 41.5 / 24.1 / 20.1 / 835 |
+| INT8-PTQ ms / fps / W / mJ per frame | 36.0 / 27.8 / 10.7 / 384 | 25.0 / 40.0 / 15.2 / 380 | 22.9 / 43.6 / 17.0 / 389 |
+| INT8 vs FP16 | 1.80x faster, 2.0x less energy | 1.77x, 2.1x | 1.81x, 2.1x |
 
 Decoder-width experiment (hardware-aware architecture search, untrained latency
 probes first, then 60-epoch training for the 3 candidates): a 0.25-width decoder
 predicting at 1/2 resolution matches the baseline's INT8 accuracy at 1.8x the
-speed, at 11.3 ms / 88 fps / 109 mJ per frame on the Jetson. Full Pareto in
+speed, at 11.3 ms / 88 fps / 189 mJ per frame on the Jetson. Full Pareto in
 [`docs/findings.md`](docs/findings.md).
 
 INT8-PTQ observations (desktop): −0.9 mIoU points for a 2x smaller engine, but only a
@@ -160,6 +163,7 @@ Every stage writes its numbers to disk, nothing lives only in stdout:
 | `benchmark.py --out b.json` | summary stats + raw per-iteration latencies | latency histograms, p99 / tail analysis |
 | `check_parity.py --out p.json` | max abs/rel diff, argmax mismatch, pass flag | export fidelity across opsets/versions |
 | `build_engine.py` | `<engine>.meta.json` (precision, size, build time, TRT version) | size vs precision, engine provenance |
+| `power.py` | reads `tegrastats.log` + `b.json` -> W and mJ per frame over the run | Jetson energy tables, power-mode sweep (`--rebuild-sweep`) |
 
 One directory per variant (`results/trt_fp16/`, `results/trt_int8_qat/`, ...).
 Engines are disposable, their `.meta.json` sidecars are not.

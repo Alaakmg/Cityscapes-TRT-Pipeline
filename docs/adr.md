@@ -321,15 +321,22 @@ incomparable.
 
 **Decision.** The headline rows use MAXN_SUPER with `jetson_clocks` (GPU
 1.02 GHz, EMC 3.2 GHz), stated in the table. Power is module input (`VDD_IN`)
-from `tegrastats` at 2 Hz during the benchmark, reported as watts and mJ per
-frame. Then sweep all modes, locked and DVFS, so the headline is a point on a
+from `tegrastats` at 2 Hz, averaged over the benchmark's run time (energy above
+the pre-run idle baseline over 220 iterations x mean latency, `segdeploy.power`),
+reported as watts and mJ per frame. Then sweep all modes, locked and DVFS, so the headline is a point on a
 curve rather than a cherry-pick.
 
 **Consequences.** The sweep produced the cleanest result in the project:
-energy per frame is set by precision, not mode (INT8-PTQ ~260-280 mJ, FP16
-~600-650 at every mode), the INT8 advantage is constant at 1.8x / 2.3x, and
+energy per frame is set by precision, not mode (INT8-PTQ 380-390 mJ, FP16
+770-840 at every mode), the INT8 advantage is constant at 1.8x / 2.0-2.1x, and
 Super mode buys latency, not efficiency. Locking clocks mostly buys p95
 determinism.
+
+**Amendment (2026-09-02).** The first version of this sweep averaged `VDD_IN`
+over the whole log, idle samples included, which under-reported power by
+10-45% and most for the fastest engines. The numbers above and everywhere else
+are the corrected ones; the old means stay in `sweep/summary.json` as
+`W_logmean` / `mJ_logmean`. The decision stands; the ratios got smaller.
 
 ---
 
@@ -343,7 +350,7 @@ Nothing. The easy conclusion was "INT8 isn't worth it for this model."
 **Decision.** Don't conclude. Keep the INT8 rows, state the desktop result
 honestly, and let the bandwidth-starved target decide.
 
-**Consequences.** On the Jetson, INT8-PTQ is 1.8x faster than FP16 and 2.4x
+**Consequences.** On the Jetson, INT8-PTQ is 1.8x faster than FP16 and 2.2x
 cheaper per frame in energy; the same model now argues the other way. It
 is the only configuration above 30 fps at 25 W. This is the project's
 clearest argument for measuring on the deployment target.
