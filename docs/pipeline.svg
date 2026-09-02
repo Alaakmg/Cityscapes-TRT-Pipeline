@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1124.775 267.82500000000005" width="1124.775" height="267.82500000000005" style="--bg:#ffffff;--fg:#1f2328;--line:#d1d9e0;--accent:#0969da;--muted:#59636e;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="TR" data-to="PT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="126.41,105.50000000000001 174.41,105.50000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PT" data-to="EX" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="254.892,105.50000000000001 284.151,105.50000000000001 284.151,73.05 313.41,73.05" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="EX" data-to="ONNX" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="448.726,73.05 494.50300000000004,73.05" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ONNX" data-to="BE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="603.143,73.05 622.2545,73.05 622.2545,140.25 639.884,140.25" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ONNX" data-to="PAR" data-style="dotted" data-arrow-start="false" data-arrow-end="true" points="603.143,66.89999999999999 745.8480000000002,66.9" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PT" data-to="QAT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="254.892,105.50000000000001 284.151,105.50000000000001 284.151,146.4 313.41,146.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="QAT" data-to="QONNX" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="444.28000000000003,146.4 494.50300000000004,146.4" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="QONNX" data-to="BE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="604.625,146.4 622.2545,146.4 622.2545,140.25 639.884,140.25" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BE" data-to="ENG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="775.2,140.25 823.1999999999999,140.25" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ENG" data-to="FP16" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="908.1279999999999,140.25 926.1279999999999,140.25 926.1279999999999,62.675 944.128,62.675" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ENG" data-to="PTQ" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="908.1279999999999,140.25 926.1279999999999,140.25 926.1279999999999,136.025 944.128,136.025" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ENG" data-to="QATE" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="908.1279999999999,140.25 926.1279999999999,140.25 926.1279999999999,209.375 944.128,209.375" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="TR" data-label="train.py" data-shape="rectangle">
+  <rect x="40" y="87.05000000000001" width="86.41" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="83.205" y="105.50000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">train.py</text>
+</g>
+<g class="node" data-id="PT" data-label="best.pt" data-shape="rectangle">
+  <rect x="174.41" y="87.05000000000001" width="80.482" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="214.651" y="105.50000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">best.pt</text>
+</g>
+<g class="node" data-id="EX" data-label="export_onnx.py" data-shape="rectangle">
+  <rect x="313.41" y="54.599999999999994" width="135.31599999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="381.068" y="73.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">export_onnx.py</text>
+</g>
+<g class="node" data-id="ONNX" data-label="model.onnx" data-shape="rectangle">
+  <rect x="494.50300000000004" y="54.599999999999994" width="108.64" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="548.8230000000001" y="73.05" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">model.onnx</text>
+</g>
+<g class="node" data-id="BE" data-label="build_engine.py" data-shape="rectangle">
+  <rect x="639.884" y="121.80000000000001" width="135.31599999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="707.542" y="140.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">build_engine.py</text>
+</g>
+<g class="node" data-id="PAR" data-label="check_parity.py
+(CI gate)" data-shape="rectangle">
+  <rect x="745.8480000000002" y="40" width="138.28000000000003" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="814.9880000000002" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="814.9880000000002" dy="-3.9000000000000012">check_parity.py</tspan><tspan x="814.9880000000002" dy="16.900000000000002">(CI gate)</tspan></text>
+</g>
+<g class="node" data-id="QAT" data-label="qat_finetune.py" data-shape="rectangle">
+  <rect x="313.41" y="127.95" width="130.87" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="378.845" y="146.4" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">qat_finetune.py</text>
+</g>
+<g class="node" data-id="QONNX" data-label="Q/DQ ONNX" data-shape="rectangle">
+  <rect x="494.50300000000004" y="127.95" width="110.122" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="549.5640000000001" y="146.4" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Q/DQ ONNX</text>
+</g>
+<g class="node" data-id="ENG" data-label=".engine" data-shape="rectangle">
+  <rect x="823.1999999999999" y="121.80000000000001" width="84.928" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="865.664" y="140.25" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">.engine</text>
+</g>
+<g class="node" data-id="FP16" data-label="FP16" data-shape="rectangle">
+  <rect x="944.128" y="44.224999999999994" width="70.108" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="979.182" y="62.675" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">FP16</text>
+</g>
+<g class="node" data-id="PTQ" data-label="INT8 PTQ
+(entropy calib.)" data-shape="rectangle">
+  <rect x="944.128" y="109.125" width="128.647" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1008.4515" y="136.025" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1008.4515" dy="-3.9000000000000012">INT8 PTQ</tspan><tspan x="1008.4515" dy="16.900000000000002">(entropy calib.)</tspan></text>
+</g>
+<g class="node" data-id="QATE" data-label="INT8 QAT" data-shape="rectangle">
+  <rect x="944.128" y="190.925" width="99.007" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="993.6315000000001" y="209.375" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">INT8 QAT</text>
+</g>
+</svg>

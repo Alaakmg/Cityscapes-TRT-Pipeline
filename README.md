@@ -101,15 +101,22 @@ Per-class IoU breakdowns will go in `docs/findings.md`. Thin structures (poles,
 humans) are usually the first classes to suffer under quantization, so I track
 per-class IoU everywhere, not just the mean.
 
+## Model
+
+ResNet50 U-Net. The encoder is an ImageNet-pretrained ResNet50: a 7x7 stem
+at 1/2 resolution, then four bottleneck stages of 256, 512, 1024 and 2048
+channels down to 1/32. The decoder climbs back in five blocks: each one
+upsamples x2 (nearest), concatenates the skip from the matching encoder stage
+and runs two Conv-BN-ReLU layers, 512 -> 256 -> 128 -> 64 channels; a fifth
+block reaches full resolution at 32 channels without a skip, and a 1x1 head
+emits the 8 Cityscapes categories. 43.9M parameters, 512x1024 input. The
+decoder-width experiment below scales all five decoder widths.
+
+![resnet50 unet](docs/unet_resnet50.png)
+
 ## Pipeline
 
-```
-train.py ──> best.pt ──> export_onnx.py ──> model.onnx ──> build_engine.py ──> .engine
-                │              │                                  │
-                │              └── check_parity.py (CI gate)      ├── FP16
-                │                                                 ├── INT8 PTQ (entropy calib.)
-                └── qat_finetune.py ──> Q/DQ ONNX ────────────────└── INT8 QAT
-```
+![pipeline](docs/pipeline.svg)
 
 `segdeploy/runners.py` gives torch / ONNX Runtime / TensorRT the same interface,
 so evaluation and benchmarking run the exact same code for every backend.
