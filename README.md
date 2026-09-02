@@ -15,7 +15,7 @@ decision log: [docs/adr.md](docs/adr.md) · findings: [docs/findings.md](docs/fi
 
 Every number is measured on the deployed TensorRT engine, on the device named:
 
-- Desktop (RTX 5090): FP16 gives 3.8x over eager PyTorch at 2.8x smaller,
+- Desktop (RTX 5090): FP16 gives 3.8x over eager PyTorch at 2.2x smaller than the FP32 engine,
   with mIoU identical to four decimals. INT8 buys ~4% more. 2.4 ms / 419 img/s.
 - Jetson Orin Nano: INT8 is 1.9x faster than FP16 and takes 2.3x less energy
   per frame. Nothing in the desktop table predicts this.
@@ -65,7 +65,8 @@ folded before quantization, 2), v4 (+ decoder concat inputs quantized, 0). v4 is
 fully INT8, faster than PTQ and +0.6 mIoU over it on the Jetson: 19.9 ms, 50 fps,
 365 mJ/frame, 0.8296. The story is in [`docs/findings.md`](docs/findings.md).
 
-FP16 on the desktop: 3.8x faster than eager PyTorch, 2.8x smaller, zero measurable mIoU loss
+FP16 on the desktop: 3.8x faster than eager PyTorch, 2.2x smaller than the FP32 engine
+(90 vs 195 MB), zero measurable mIoU loss
 (per-class IoU stable to 4 decimals, including the thin-structure classes). ONNX export
 parity: max abs logit diff 4.1e-05, argmax mismatch 3.8e-06 (`results/.../parity_onnx.json`).
 

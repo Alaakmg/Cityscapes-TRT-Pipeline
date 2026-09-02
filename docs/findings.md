@@ -35,11 +35,11 @@ meaningless. Gate on absolute diff + argmax agreement, not relative.
 | backend | mIoU | mean ms | p95 ms | img/s | MB |
 |---|---|---|---|---|---|
 | PyTorch FP32 | 0.8334 | 9.35 | 9.66 | 107 | 176 |
-| TRT FP32 | 0.8334 | 6.17 | 6.19 | 162 | 251 |
+| TRT FP32 | 0.8334 | 6.17 | 6.19 | 162 | 195 |
 | TRT FP16 | 0.8334 | 2.96 | 2.97 | 338 | 89 |
 | TRT INT8-PTQ | 0.8246 | 2.94 | 2.96 | 340 | 46 |
 
-FP16: 3.2x over eager PyTorch, 2.8x smaller, and mIoU identical to four
+FP16: 3.2x over eager PyTorch, 2.2x smaller than the FP32 engine, and mIoU identical to four
 decimals, `object` and `human` included. Also worth noticing: TensorRT's
 latency distribution is *tight* (FP32: 6.17 mean / 6.19 p95) where PyTorch
 eager has visible spread. Determinism is its own feature on an AV stack.
