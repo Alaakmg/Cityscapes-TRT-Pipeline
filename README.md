@@ -54,23 +54,7 @@ benchmark's own run time (energy above the pre-run idle baseline, divided by
 are excluded; an earlier revision averaged the whole log and under-reported by 10-45%.
 Raw JSONs, tegrastats logs and `trtexec` layer profiles in `results/`.
 
-| Variant | Precision | Device | mIoU | Δ vs FP32 | Latency mean (ms) | p95 (ms) | img/s | Size (MB) |
-|---|---|---|---|---|---|---|---|---|
-| PyTorch | FP32 | RTX 5090 | 0.8334 | – | 9.41 | 9.54 | 106 | 176 |
-| TensorRT | FP32 | RTX 5090 | 0.8334 | ±0.0000 | 6.13 | 6.30 | 163 | 251 |
-| TensorRT | FP16 | RTX 5090 | 0.8334 | −0.0000 | 2.48 | 2.59 | 403 | 89 |
-| TensorRT | INT8 (PTQ) | RTX 5090 | 0.8246 | −0.0088 | 2.39 | 2.50 | 419 | 46 |
-| TensorRT | INT8 (QAT v1) | RTX 5090 | 0.8290 | −0.0044 | 2.54 | 2.60 | 394 | 107 |
-| TensorRT | INT8 (QAT v2) | RTX 5090 | 0.8287 | −0.0047 | 2.50 | 2.51 | 400 | 107 |
-| TensorRT | INT8 (QAT v3) | RTX 5090 | 0.8267 | −0.0067 | 2.47 | 2.48 | 405 | 107 |
-| TensorRT | INT8 (QAT v4) | RTX 5090 | 0.8295 | −0.0039 | 3.10 | 3.11 | 323 | 46 |
-| TensorRT | FP32 | Jetson Orin Nano | 0.8334 | ±0.0000 | 108.8 | 109.1 | 9.2 | 176 |
-| TensorRT | FP16 | Jetson Orin Nano | 0.8334 | −0.0000 | 38.9 | 39.0 | 25.7 | 88 |
-| TensorRT | INT8 (PTQ) | Jetson Orin Nano | 0.8236 | −0.0098 | **20.4** | 20.5 | **49.0** | 45 |
-| TensorRT | INT8 (QAT v1) | Jetson Orin Nano | 0.8290 | −0.0044 | 31.8 | 31.8 | 31.5 | 45 |
-| TensorRT | INT8 (QAT v2) | Jetson Orin Nano | 0.8287 | −0.0047 | 29.6 | 29.6 | 33.8 | 45 |
-| TensorRT | INT8 (QAT v3) | Jetson Orin Nano | 0.8268 | −0.0066 | 26.4 | 26.5 | 37.9 | 45 |
-| TensorRT | **INT8 (QAT v4)** | Jetson Orin Nano | **0.8296** | −0.0038 | **19.9** | 20.1 | **50.2** | 45 |
+![scoreboard](docs/scoreboard.png)
 
 All rows: harness v2 (pinned host buffers, private CUDA stream), within ~0.5 ms of `trtexec`.
 The original v1-harness numbers stay in `results/` for reference.
